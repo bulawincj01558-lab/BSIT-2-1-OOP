@@ -1,5 +1,4 @@
 public abstract class User implements Exportable {
-
     private final int id;
     private String name;
     private String email;
@@ -10,35 +9,17 @@ public abstract class User implements Exportable {
         this.email = email;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getEmail() { return email; }
+    public void setName(String name) { this.name = name; }
+    public void setEmail(String email) { this.email = email; }
 
     public abstract String role();
-
     public abstract String permissions();
 
     public void display() {
-        System.out.printf(
-                "[%d] %-12s %-24s %-8s %s%n",
-                id, name, email, role(), permissions()
-        );
+        System.out.printf("[%d] %-12s %-24s %-8s %s%n", id, name, email, role(), permissions());
     }
 
     @Override

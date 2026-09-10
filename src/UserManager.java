@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 
 public class UserManager {
-
     private ArrayList<User> users = new ArrayList<>();
 
     public void add(User user) {
@@ -14,15 +13,13 @@ public class UserManager {
             System.out.println("No users yet.");
             return;
         }
-
-        String header = "ID NAME EMAIL ROLE PERMISSIONS";
+        String header =
+                "ID   NAME         EMAIL                    ROLE     PERMISSIONS";
         System.out.println(header);
         System.out.println("-".repeat(69));
-
         for (User u : users) {
             u.display();
         }
-
         System.out.println("Total users: " + users.size());
     }
 
@@ -32,17 +29,14 @@ public class UserManager {
                 return u;
             }
         }
-
         return null;
     }
 
     public boolean deleteById(int id) {
         User found = findById(id);
-
         if (found == null) {
             return false;
         }
-
         users.remove(found);
         return true;
     }
@@ -52,17 +46,12 @@ public class UserManager {
             System.out.println("Nothing to export.");
             return;
         }
-
         System.out.println("--- CSV EXPORT ---");
-
         for (User u : users) {
             u.printExport();
         }
-
         System.out.println("--- END OF EXPORT ---");
     }
 
-    public int count() {
-        return users.size();
-    }
+    public int count() { return users.size(); }
 }

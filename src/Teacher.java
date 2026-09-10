@@ -1,5 +1,4 @@
 public class Teacher extends User {
-
     private String department;
 
     public Teacher(int id, String name, String email, String department) {
@@ -7,9 +6,7 @@ public class Teacher extends User {
         this.department = department;
     }
 
-    public String getDepartment() {
-        return department;
-    }
+    public String getDepartment() { return department; }
 
     @Override
     public String role() {
