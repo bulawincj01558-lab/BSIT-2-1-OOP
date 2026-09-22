@@ -1,0 +1,37 @@
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #f7f5f0;
+}
+.school-label  { -fx-text-fill: #b8913a; -fx-font-size: 11px; -fx-font-weight: bold; }
+.title-label   { -fx-text-fill: #7a1c1c; -fx-font-size: 26px; -fx-font-weight: bold; }
+.field-label   { -fx-text-fill: #34495e; -fx-font-weight: bold; }
+.text-field    { -fx-pref-height: 34px; }
+.message-label { -fx-text-fill: #b3261e; }
+
+.primary-button {
+    -fx-background-color: #7a1c1c;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-pref-height: 38px;
+    -fx-cursor: hand;
+}
+.primary-button:hover { -fx-background-color: #5e1414; }
+
+.profile-root   { -fx-background-color: white; }
+.profile-header { -fx-background-color: #7a1c1c; }
+.header-caption { -fx-text-fill: #d4a84b; -fx-font-size: 11px; -fx-font-weight: bold; }
+.name-label     { -fx-text-fill: white; -fx-font-size: 18px; -fx-font-weight: bold; }
+
+.initials-circle {
+    -fx-background-color: #c9a04a;
+    -fx-background-radius: 40;
+    -fx-min-width: 64;
+    -fx-min-height: 64;
+    -fx-alignment: center;
+    -fx-text-fill: #7a1c1c;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.detail-key   { -fx-text-fill: #34495e; -fx-font-weight: bold; }
+.detail-value { -fx-background-color: #f2f0eb; -fx-padding: 4 10; -fx-border-color: #dddddd; }
