@@ -6,9 +6,13 @@ public class UserManager {
 
     public void add(User user) {
         users.add(user);
+<<<<<<< HEAD
         System.out.println(
                 "Added: " + user.getName() + " (" + user.role() + ")"
         );
+=======
+        System.out.println("Added: " + user.getName() + " (" + user.role() + ")");
+>>>>>>> 6f0cb40e265dbb726ba00b7d409a368d1ac89a8a
     }
 
     public void listAll() {
@@ -17,9 +21,13 @@ public class UserManager {
             return;
         }
 
+<<<<<<< HEAD
         String header =
                 "ID NAME EMAIL ROLE PERMISSIONS";
 
+=======
+        String header = "ID NAME EMAIL ROLE PERMISSIONS";
+>>>>>>> 6f0cb40e265dbb726ba00b7d409a368d1ac89a8a
         System.out.println(header);
         System.out.println("-".repeat(69));
 
