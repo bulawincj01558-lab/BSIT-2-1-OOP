@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< HEAD
       <module fileurl="file://$PROJECT_DIR$/BSIT 2-1.iml" filepath="$PROJECT_DIR$/BSIT 2-1.iml" />
-=======
-      <module fileurl="file://$PROJECT_DIR$/BSIT-2-1-OOP.iml" filepath="$PROJECT_DIR$/BSIT-2-1-OOP.iml" />
->>>>>>> 6f0cb40e265dbb726ba00b7d409a368d1ac89a8a
     </modules>
   </component>
 </project>
