@@ -2,23 +2,17 @@ package edu.liceo.ugoautomate.model;
 
 import java.time.LocalDateTime;
 
-/**
- * A recorded, approved campus entry. Name and identifier are stored as a
- * snapshot so the log remains meaningful if the account is later removed.
- */
 public class EntryLog {
-
     private long id;
     private EntrantType entrantType;
     private Long userId;
     private Long visitId;
     private String entrantName;
-    private String identifier;
     private String details;
     private VerificationMethod method;
     private Long verifiedBy;
     private String verifiedByName;
-    private LocalDateTime entryTime;
+    private LocalDateTime loggedAt;
 
     public long getId() {
         return id;
@@ -60,14 +54,6 @@ public class EntryLog {
         this.entrantName = entrantName;
     }
 
-    public String getIdentifier() {
-        return identifier;
-    }
-
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
-    }
-
     public String getDetails() {
         return details;
     }
@@ -100,11 +86,11 @@ public class EntryLog {
         this.verifiedByName = verifiedByName;
     }
 
-    public LocalDateTime getEntryTime() {
-        return entryTime;
+    public LocalDateTime getLoggedAt() {
+        return loggedAt;
     }
 
-    public void setEntryTime(LocalDateTime entryTime) {
-        this.entryTime = entryTime;
+    public void setLoggedAt(LocalDateTime loggedAt) {
+        this.loggedAt = loggedAt;
     }
 }

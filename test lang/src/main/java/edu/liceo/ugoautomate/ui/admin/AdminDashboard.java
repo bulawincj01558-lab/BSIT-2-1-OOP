@@ -1,56 +1,78 @@
 package edu.liceo.ugoautomate.ui.admin;
 
 import edu.liceo.ugoautomate.AppContext;
-import edu.liceo.ugoautomate.ui.common.CampusNavigatorPanel;
-import edu.liceo.ugoautomate.ui.common.DashboardFrame;
-import edu.liceo.ugoautomate.ui.common.DataStructuresPanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel.Shortcut;
-import edu.liceo.ugoautomate.ui.common.ProfilePanel;
+import edu.liceo.ugoautomate.model.User;
+import edu.liceo.ugoautomate.ui.common.DashboardController;
+import edu.liceo.ugoautomate.ui.common.DataStructuresController;
+import edu.liceo.ugoautomate.ui.common.HomeController;
+import edu.liceo.ugoautomate.ui.common.HomeController.Shortcut;
+import edu.liceo.ugoautomate.ui.common.ProfileController;
+import edu.liceo.ugoautomate.ui.common.QrScanController;
+import edu.liceo.ugoautomate.ui.common.Views;
+import edu.liceo.ugoautomate.ui.common.Views.View;
 
-/**
- * Administrator dashboard: entry verification, account, location, and
- * attendance management, and entry/visit logs.
- */
-public class AdminDashboard extends DashboardFrame {
+public final class AdminDashboard {
+    private static final String HOME = "Home";
+    private static final String GATE = "Entry Gate";
+    private static final String ACCOUNTS = "Accounts";
+    private static final String LOCATIONS = "Locations";
+    private static final String SESSIONS = "Attendance Sessions";
+    private static final String RECORDS = "Attendance Records";
+    private static final String LOGS = "Entry & Visit Logs";
+    private static final String CLASSES = "Class Programs";
+    private static final String DISCIPLINE = "Discipline";
+    private static final String TUITION = "Tuition";
+    private static final String FACULTY = "Faculty";
+    private static final String RESULTS = "Evaluation Results";
+    private static final String DATA_STRUCTURES = "Data Structures";
+    private static final String PROFILE = "My Profile";
 
-    static final String HOME = "Home";
-    static final String GATE = "Entry Verification";
-    static final String ACCOUNTS = "Accounts";
-    static final String LOCATIONS = "Campus Locations";
-    static final String SESSIONS = "Attendance Sessions";
-    static final String RECORDS = "Attendance Records";
-    static final String LOGS = "Entry & Visit Logs";
-    static final String NAVIGATOR = "Campus Navigator";
-    static final String PROFILE = "My Profile";
-    static final String DATA_STRUCTURES = "Data Structures";
-
-    public AdminDashboard(AppContext ctx) {
-        super(ctx, "Administrator");
-        addPage(HOME, new HomePanel("Administrator Console",
-                "Manage campus records and verify entries.", this::showPage,
-                new Shortcut(GATE, "Verify student entry passes, guest visit passes, or student credentials at the gate."),
-                new Shortcut(SESSIONS, "Create class or event sessions and display their attendance QR codes."),
-                new Shortcut(RECORDS, "View, add, or remove recorded attendance per session."),
-                new Shortcut(ACCOUNTS, "View and manage student and guest accounts."),
-                new Shortcut(LOCATIONS, "Add, update, or remove campus buildings, offices, and facilities."),
-                new Shortcut(LOGS, "Review campus entry logs and guest visit registrations."),
-                new Shortcut(DATA_STRUCTURES, "See the arrays, lists, stacks, and queues used in this app, with memory use and Big-O time complexity.")));
-        addPage(GATE, new EntryGatePanel(ctx));
-        addPage(SESSIONS, new AttendanceSessionsPanel(ctx, this));
-        addPage(RECORDS, new AttendanceRecordsPanel(ctx));
-        addPage(ACCOUNTS, new AccountsPanel(ctx));
-        addPage(LOCATIONS, new LocationsPanel(ctx));
-        addPage(LOGS, new EntryLogsPanel(ctx));
-        addPage(NAVIGATOR, new CampusNavigatorPanel(ctx));
-        addPage(PROFILE, new ProfilePanel(ctx));
-        addPage(DATA_STRUCTURES, new DataStructuresPanel());
-        showPage(HOME);
+    private AdminDashboard() {
     }
 
-    /** Opens the Attendance Records page focused on one session. */
-    void showRecordsFor(long sessionId) {
-        showPage(RECORDS);
-        AttendanceRecordsPanel.selectSession(this, sessionId);
+    public static View<DashboardController> create(AppContext ctx, User admin) {
+        View<DashboardController> view = Views.load(ctx, "common/Dashboard.fxml");
+        DashboardController d = view.controller();
+        d.setRole("Administrator");
+
+        d.addPage(HOME, HomeController.create(ctx, "Welcome, " + admin.getFirstName() + "!", admin.getSummary(), d::showPage,
+                new Shortcut(GATE, "Verify student entry QR codes and guest passes, and log campus entries."),
+                new Shortcut(ACCOUNTS, "View, edit, deactivate, or remove student and guest accounts."),
+                new Shortcut(LOCATIONS, "Add, update, or remove campus buildings, offices, and facilities."),
+                new Shortcut(SESSIONS, "Create class/event sessions and display their attendance QR codes."),
+                new Shortcut(RECORDS, "View and manage recorded attendance."),
+                new Shortcut(LOGS, "Review campus entry logs and guest visits."),
+                new Shortcut(CLASSES, "Create each term's classes and enroll students without schedule conflicts."),
+                new Shortcut(FACULTY, "Add and update the teachers that students evaluate."),
+                new Shortcut(RESULTS, "Open or close faculty evaluation and see anonymous results."),
+                new Shortcut(DISCIPLINE, "Record, follow up, and resolve students' disciplinary cases."),
+                new Shortcut(TUITION, "Assess tuition from class programs and record payments and discounts."),
+                new Shortcut(DATA_STRUCTURES, "See the data structures behind the app, with memory allocation and time complexity.")));
+        d.addPage(GATE, QrScanController.create(ctx, "Entry Gate Verification",
+                "Scan a student's entry QR or a guest pass. Entries are logged only when verification succeeds.",
+                d.scanHistory(), (code, method) -> ctx.entries().verifyEntry(code, method)));
+        d.addPage(ACCOUNTS, Views.load(ctx, "admin/Accounts.fxml"));
+        d.addPage(LOCATIONS, Views.load(ctx, "admin/Locations.fxml"));
+
+        View<AttendanceRecordsController> records = Views.load(ctx, "admin/AttendanceRecords.fxml");
+        View<AttendanceSessionsController> sessions = Views.load(ctx, "admin/AttendanceSessions.fxml");
+        sessions.controller().setOnViewRecords(session -> {
+            records.controller().filterBySession(session.getId());
+            d.showPage(RECORDS);
+        });
+        d.addPage(SESSIONS, sessions);
+        d.addPage(RECORDS, records);
+        d.addPage(LOGS, Views.load(ctx, "admin/EntryLogs.fxml"));
+        d.addPage(CLASSES, Views.load(ctx, "admin/ClassPrograms.fxml"));
+        d.addPage(FACULTY, Views.load(ctx, "admin/Faculty.fxml"));
+        d.addPage(RESULTS, Views.load(ctx, "admin/EvaluationResults.fxml"));
+        d.addPage(DISCIPLINE, Views.load(ctx, "admin/Discipline.fxml"));
+        d.addPage(TUITION, Views.load(ctx, "admin/Tuition.fxml"));
+        d.addPage(DATA_STRUCTURES, DataStructuresController.create(ctx, d));
+        View<ProfileController> profile = Views.load(ctx, "common/Profile.fxml");
+        profile.controller().setOnSaved(d::refreshHeader);
+        d.addPage(PROFILE, profile);
+        d.showFirstPage();
+        return view;
     }
 }

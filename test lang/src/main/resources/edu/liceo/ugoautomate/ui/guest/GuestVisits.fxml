@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.guest.GuestVisitsController" styleClass="page">
+    <Label text="My Visits" styleClass="page-title"/>
+    <Label text="Register your visit, then show its guest pass QR at the gate on the visit date."
+           styleClass="page-subtitle" wrapText="true"/>
+
+    <GridPane fx:id="body" hgap="16" vgap="16" VBox.vgrow="ALWAYS">
+        <VBox styleClass="card">
+            <Label text="My registered visits" styleClass="section-title"/>
+            <FlowPane styleClass="toolbar">
+                <Button text="Show guest pass" styleClass="primary" onAction="#showPass"/>
+                <Button text="Cancel visit" styleClass="danger" onAction="#cancel"/>
+                <Button text="Refresh" onAction="#reload"/>
+            </FlowPane>
+            <TableView fx:id="table" minHeight="260" VBox.vgrow="ALWAYS"/>
+        </VBox>
+
+        <VBox styleClass="card">
+            <Label text="Register a new visit" styleClass="section-title"/>
+            <GridPane styleClass="form">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="150"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+                <Label text="Purpose of visit" GridPane.rowIndex="0"/>
+                <TextField fx:id="purpose" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                <Label text="Person/office to visit" GridPane.rowIndex="1"/>
+                <TextField fx:id="personToVisit" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                <Label text="Visit date" GridPane.rowIndex="2"/>
+                <DatePicker fx:id="visitDate" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+            </GridPane>
+            <Label fx:id="aheadNote" styleClass="muted" wrapText="true"/>
+            <Button text="Register visit" styleClass="primary" onAction="#register"/>
+        </VBox>
+    </GridPane>
+</VBox>

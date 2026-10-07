@@ -2,13 +2,43 @@ package edu.liceo.ugoautomate.security;
 
 import java.time.Instant;
 
-/**
- * The verified contents of a signed QR payload.
- *
- * @param type      purpose of the code
- * @param subjectId id of the session, student, or visit the code refers to
- * @param nonce     random value binding the code to server-side state
- * @param expiresAt instant after which the code is rejected
- */
-public record QrToken(QrTokenType type, long subjectId, String nonce, Instant expiresAt) {
+public final class QrToken {
+    private final QrTokenType type;
+    private final long subjectId;
+    private final Instant issuedAt;
+    private final Instant expiresAt;
+    private final String encoded;
+
+    QrToken(QrTokenType type, long subjectId, Instant issuedAt, Instant expiresAt, String encoded) {
+        this.type = type;
+        this.subjectId = subjectId;
+        this.issuedAt = issuedAt;
+        this.expiresAt = expiresAt;
+        this.encoded = encoded;
+    }
+
+    public QrTokenType getType() {
+        return type;
+    }
+
+    public long getSubjectId() {
+        return subjectId;
+    }
+
+    public Instant getIssuedAt() {
+        return issuedAt;
+    }
+
+    public Instant getExpiresAt() {
+        return expiresAt;
+    }
+
+    public String getEncoded() {
+        return encoded;
+    }
+
+    @Override
+    public String toString() {
+        return type + "#" + subjectId + " (expires " + expiresAt + ")";
+    }
 }

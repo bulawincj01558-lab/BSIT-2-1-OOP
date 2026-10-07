@@ -1,0 +1,15 @@
+# Supabase connection for Liceo U Go Automate.
+#
+# 1. Copy this file to "supabase.properties" (same folder). That file is git-ignored; never commit it.
+# 2. In Supabase: open your project -> click "Connect" (top bar) -> "Session pooler" -> "View parameters".
+# 3. Copy host, port, database, and user below, and put the database password you set for the project.
+#    (Forgot it? Project Settings -> Database -> Reset database password.)
+#
+# If supabase.properties is missing, the app uses the local SQLite file (~/.liceo-ugo/ugo.db) instead.
+# Use an empty Supabase project: the app creates its tables and sample accounts on first run.
+
+db.host=aws-0-YOUR-REGION.pooler.supabase.com
+db.port=5432
+db.name=postgres
+db.user=postgres.YOUR-PROJECT-REF
+db.password=YOUR-DATABASE-PASSWORD

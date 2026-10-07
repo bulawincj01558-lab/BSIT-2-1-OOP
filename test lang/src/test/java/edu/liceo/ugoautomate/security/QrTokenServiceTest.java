@@ -1,64 +1,99 @@
 package edu.liceo.ugoautomate.security;
 
-import edu.liceo.ugoautomate.MutableClock;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.Arrays;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class QrTokenServiceTest {
+    private static final byte[] SECRET = "0123456789abcdef0123456789abcdef".getBytes();
 
-    private final MutableClock clock = new MutableClock(Instant.parse("2026-09-28T01:00:00Z"), ZoneId.of("Asia/Manila"));
-    private final byte[] secret = filled(7);
-    private final QrTokenService service = new QrTokenService(secret, clock);
+    private static final class MutableClock extends Clock {
+        private Instant now;
+
+        MutableClock(Instant start) {
+            this.now = start;
+        }
+
+        void advance(Duration d) {
+            now = now.plus(d);
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
+    }
+
+    private final MutableClock clock = new MutableClock(Instant.parse("2026-09-29T08:00:00Z"));
+    private final QrTokenService service = new QrTokenService(SECRET, clock);
 
     @Test
-    void issuedTokenVerifies() {
-        String nonce = QrTokenService.newNonce();
-        String payload = service.issue(QrTokenType.ATTENDANCE, 42, nonce, clock.instant().plusSeconds(600));
-        QrToken token = service.verify(payload);
-        assertEquals(QrTokenType.ATTENDANCE, token.type());
-        assertEquals(42, token.subjectId());
-        assertEquals(nonce, token.nonce());
+    void issuedTokenVerifiesAndKeepsBinding() throws InvalidQrException {
+        QrToken issued = service.issue(QrTokenType.ATTENDANCE, 42, clock.instant().plus(Duration.ofHours(1)));
+
+        QrToken verified = service.verify(issued.getEncoded());
+
+        assertEquals(QrTokenType.ATTENDANCE, verified.getType());
+        assertEquals(42, verified.getSubjectId());
+        assertTrue(issued.getEncoded().startsWith("UGO1.ATTENDANCE.42."));
+    }
+
+    @Test
+    void tokensForSameSubjectDifferByNonce() {
+        Instant exp = clock.instant().plus(Duration.ofHours(1));
+        assertNotEquals(service.issue(QrTokenType.GUEST_PASS, 1, exp).getEncoded(),
+                service.issue(QrTokenType.GUEST_PASS, 1, exp).getEncoded());
     }
 
     @Test
     void tamperedSubjectIsRejected() {
-        String payload = service.issue(QrTokenType.ENTRY_PASS, 5, QrTokenService.newNonce(), clock.instant().plusSeconds(600));
-        String tampered = payload.replace("|ENT|5|", "|ENT|6|");
-        assertThrows(InvalidQrException.class, () -> service.verify(tampered));
+        String token = service.issue(QrTokenType.ATTENDANCE, 42, clock.instant().plus(Duration.ofHours(1))).getEncoded();
+        String tampered = token.replace("UGO1.ATTENDANCE.42.", "UGO1.ATTENDANCE.43.");
+
+        InvalidQrException e = assertThrows(InvalidQrException.class, () -> service.verify(tampered));
+        assertTrue(e.getMessage().contains("signature"));
     }
 
     @Test
-    void codeFromAnotherInstallationIsRejected() {
-        QrTokenService other = new QrTokenService(filled(9), clock);
-        String payload = other.issue(QrTokenType.VISIT_PASS, 1, QrTokenService.newNonce(), clock.instant().plusSeconds(600));
-        assertThrows(InvalidQrException.class, () -> service.verify(payload));
+    void tokenFromAnotherInstallationIsRejected() {
+        QrTokenService other = new QrTokenService("another-installation-secret-32b!".getBytes(), clock);
+        String foreign = other.issue(QrTokenType.STUDENT_ENTRY, 2, clock.instant().plus(Duration.ofMinutes(5))).getEncoded();
+
+        assertThrows(InvalidQrException.class, () -> service.verify(foreign));
     }
 
     @Test
-    void expiredCodeIsRejected() {
-        String payload = service.issue(QrTokenType.ATTENDANCE, 1, QrTokenService.newNonce(), clock.instant().plusSeconds(60));
-        clock.advance(Duration.ofSeconds(61));
-        InvalidQrException e = assertThrows(InvalidQrException.class, () -> service.verify(payload));
-        assertEquals("This QR code has expired.", e.getMessage());
+    void expiredTokenIsRejected() {
+        String token = service.issue(QrTokenType.STUDENT_ENTRY, 2, clock.instant().plus(Duration.ofMinutes(5))).getEncoded();
+        clock.advance(Duration.ofMinutes(6));
+
+        InvalidQrException e = assertThrows(InvalidQrException.class, () -> service.verify(token));
+        assertTrue(e.getMessage().contains("expired"));
     }
 
     @Test
     void garbageIsRejected() {
-        assertThrows(InvalidQrException.class, () -> service.verify("https://example.com"));
         assertThrows(InvalidQrException.class, () -> service.verify(""));
-        assertThrows(InvalidQrException.class, () -> service.verify("LUGA1|ATT|1|x|y|z"));
-    }
-
-    private static byte[] filled(int value) {
-        byte[] b = new byte[32];
-        Arrays.fill(b, (byte) value);
-        return b;
+        assertThrows(InvalidQrException.class, () -> service.verify("https://example.com"));
+        assertThrows(InvalidQrException.class, () -> service.verify("UGO1.ATTENDANCE.x.1.2.n.sig"));
     }
 }

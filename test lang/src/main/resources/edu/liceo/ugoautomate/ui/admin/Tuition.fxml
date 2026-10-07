@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.TuitionController" styleClass="page">
+    <Label text="Tuition" styleClass="page-title"/>
+    <Label text="Students' tuition balances. Assess tuition from the class programs, then record payments and discounts as they come in."
+           styleClass="page-subtitle" wrapText="true"/>
+
+    <FlowPane styleClass="toolbar">
+        <Label text="Term:"/>
+        <ComboBox fx:id="termFilter" prefWidth="260" onAction="#reload"/>
+        <TextField fx:id="search" promptText="Student name or ID" prefColumnCount="16" onAction="#reload"/>
+        <CheckBox fx:id="withBalanceOnly" text="With balance only" onAction="#reload"/>
+        <Button text="Search" onAction="#reload"/>
+        <Button text="Assess tuition..." styleClass="primary" onAction="#assess"/>
+    </FlowPane>
+    <Label fx:id="summary" styleClass="muted" wrapText="true"/>
+    <TableView fx:id="accounts" minHeight="220" VBox.vgrow="ALWAYS"/>
+
+    <VBox styleClass="card">
+        <Label fx:id="ledgerTitle" text="Select a student to see their ledger." styleClass="section-title" wrapText="true"/>
+        <Label fx:id="ledgerTotals" styleClass="muted" wrapText="true"/>
+        <FlowPane styleClass="toolbar">
+            <Button text="Add charge..." onAction="#addCharge"/>
+            <Button text="Record payment..." styleClass="primary" onAction="#addPayment"/>
+            <Button text="Add discount..." onAction="#addDiscount"/>
+            <Button text="Delete entry" styleClass="danger" onAction="#deleteEntry"/>
+        </FlowPane>
+        <TableView fx:id="ledger" minHeight="200"/>
+    </VBox>
+</VBox>

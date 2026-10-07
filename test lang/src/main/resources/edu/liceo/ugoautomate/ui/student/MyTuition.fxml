@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.student.MyTuitionController" styleClass="page">
+    <Label text="My Tuition" styleClass="page-title"/>
+    <Label text="Your statement of account for this term. Pay at the Cashier / Accounting Office and keep your official receipt (OR)."
+           styleClass="page-subtitle" wrapText="true"/>
+
+    <VBox styleClass="card">
+        <Label fx:id="termLabel" styleClass="muted"/>
+        <Label fx:id="balance" styleClass="balance-amount" wrapText="true"/>
+        <Label fx:id="totals" styleClass="muted" wrapText="true"/>
+    </VBox>
+
+    <FlowPane styleClass="toolbar">
+        <Button text="Refresh" onAction="#reload"/>
+    </FlowPane>
+    <TableView fx:id="table" minHeight="240" VBox.vgrow="ALWAYS"/>
+</VBox>

@@ -1,60 +1,60 @@
 package edu.liceo.ugoautomate.ui.common;
 
-import javax.swing.SwingWorker;
-import java.awt.Component;
-import java.awt.Cursor;
+import javafx.application.Platform;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
-/**
- * Runs service calls off the Swing event thread so the UI stays responsive,
- * then delivers the result (or shows the error) back on the event thread.
- */
 public final class Async {
+    private static final ExecutorService WORKERS = Executors.newCachedThreadPool(task -> {
+        Thread thread = new Thread(task, "ugo-worker");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     private Async() {
     }
 
-    public static <T> void run(Component parent, Callable<T> task, Consumer<T> onSuccess) {
-        run(parent, task, onSuccess, null);
+    public static <T> void run(Node owner, Callable<T> task, Consumer<T> onSuccess) {
+        run(owner, task, onSuccess, null);
     }
 
-    /**
-     * @param parent    component used for the wait cursor and error dialogs (may be null)
-     * @param task      work to run in the background
-     * @param onSuccess called on the event thread with the task's result
-     * @param onFinally called on the event thread after success or failure (may be null)
-     */
-    public static <T> void run(Component parent, Callable<T> task, Consumer<T> onSuccess, Runnable onFinally) {
-        if (parent != null) {
-            parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    public static <T> void run(Node owner, Callable<T> task, Consumer<T> onSuccess, Runnable onDone) {
+        Scene scene = owner == null ? null : owner.getScene();
+        if (scene != null) {
+            scene.setCursor(Cursor.WAIT);
         }
-        new SwingWorker<T, Void>() {
-            @Override
-            protected T doInBackground() throws Exception {
-                return task.call();
+        WORKERS.execute(() -> {
+            T result = null;
+            Throwable failure = null;
+            try {
+                result = task.call();
+            } catch (Throwable t) {
+                failure = t;
             }
-
-            @Override
-            protected void done() {
-                if (parent != null) {
-                    parent.setCursor(Cursor.getDefaultCursor());
+            T value = result;
+            Throwable error = failure;
+            Platform.runLater(() -> {
+                if (scene != null) {
+                    scene.setCursor(Cursor.DEFAULT);
                 }
                 try {
-                    onSuccess.accept(get());
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                } catch (ExecutionException e) {
-                    Dialogs.error(parent, e.getCause());
-                } catch (RuntimeException e) {
-                    Dialogs.error(parent, e);
+                    if (error == null) {
+                        onSuccess.accept(value);
+                    } else {
+                        Dialogs.error(owner, error);
+                    }
                 } finally {
-                    if (onFinally != null) {
-                        onFinally.run();
+                    if (onDone != null) {
+                        onDone.run();
                     }
                 }
-            }
-        }.execute();
+            });
+        });
     }
 }

@@ -1,25 +1,22 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * The three kinds of accounts supported by the system.
- */
 public enum Role {
     STUDENT("Student"),
     GUEST("Guest"),
     ADMIN("Administrator");
 
-    private final String displayName;
+    private final String label;
 
-    Role(String displayName) {
-        this.displayName = displayName;
+    Role(String label) {
+        this.label = label;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getLabel() {
+        return label;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return label;
     }
 }

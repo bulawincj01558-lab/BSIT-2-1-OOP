@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.StudentRegistrationController"
+      styleClass="page" prefWidth="520">
+    <Label text="Create a student account" styleClass="page-title"/>
+
+    <GridPane styleClass="form">
+        <columnConstraints>
+            <ColumnConstraints minWidth="170"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label text="Student ID" GridPane.rowIndex="0"/>
+        <TextField fx:id="studentNumber" promptText="2023-00123" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label text="First name" GridPane.rowIndex="1"/>
+        <TextField fx:id="firstName" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Last name" GridPane.rowIndex="2"/>
+        <TextField fx:id="lastName" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Course" GridPane.rowIndex="3"/>
+        <ComboBox fx:id="course" editable="true" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Year level" GridPane.rowIndex="4"/>
+        <ComboBox fx:id="yearLevel" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="Email" GridPane.rowIndex="5"/>
+        <TextField fx:id="email" promptText="you@liceo.edu.ph" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label text="Contact number (optional)" GridPane.rowIndex="6"/>
+        <TextField fx:id="contact" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label text="Password" GridPane.rowIndex="7"/>
+        <PasswordField fx:id="password" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+        <Label text="Confirm password" GridPane.rowIndex="8"/>
+        <PasswordField fx:id="confirm" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+    </GridPane>
+    <Label text="Password: at least 8 characters with a letter and a number." styleClass="muted" wrapText="true"/>
+
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Cancel" cancelButton="true" onAction="#cancel"/>
+        <Button fx:id="registerButton" text="Register" styleClass="primary" defaultButton="true" onAction="#register"/>
+    </HBox>
+</VBox>

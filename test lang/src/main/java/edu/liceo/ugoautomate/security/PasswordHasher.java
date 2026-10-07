@@ -2,33 +2,27 @@ package edu.liceo.ugoautomate.security;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-/**
- * BCrypt password hashing. Plain-text passwords are never stored.
- */
-public final class PasswordHasher {
-
-    /** BCrypt cost factor (2^10 rounds, roughly 50-100 ms per hash on desktop hardware). */
+public class PasswordHasher {
     private static final int LOG_ROUNDS = 10;
 
-    private PasswordHasher() {
+    private final String dummyHash = BCrypt.hashpw("dummy-password-for-timing", BCrypt.gensalt(LOG_ROUNDS));
+
+    public String hash(String plainPassword) {
+        return BCrypt.hashpw(plainPassword, BCrypt.gensalt(LOG_ROUNDS));
     }
 
-    public static String hash(char[] password) {
-        return BCrypt.hashpw(new String(password), BCrypt.gensalt(LOG_ROUNDS));
-    }
-
-    /**
-     * @return true if {@code password} matches {@code hash}; false for any
-     *         malformed input instead of throwing
-     */
-    public static boolean verify(char[] password, String hash) {
-        if (password == null || hash == null || hash.isBlank()) {
+    public boolean verify(String plainPassword, String storedHash) {
+        if (plainPassword == null || storedHash == null || !storedHash.startsWith("$2")) {
             return false;
         }
         try {
-            return BCrypt.checkpw(new String(password), hash);
+            return BCrypt.checkpw(plainPassword, storedHash);
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public String dummyHash() {
+        return dummyHash;
     }
 }

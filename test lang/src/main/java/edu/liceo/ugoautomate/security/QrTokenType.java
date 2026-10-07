@@ -1,35 +1,19 @@
 package edu.liceo.ugoautomate.security;
 
-import java.util.Optional;
-
-/**
- * Purposes a signed QR code can be issued for. The short code is embedded in
- * the payload so a code issued for one purpose can never be used for another.
- */
 public enum QrTokenType {
-    /** Attendance session code displayed by an administrator; subject = session id. */
-    ATTENDANCE("ATT"),
-    /** Student campus entry pass; subject = student user id. */
-    ENTRY_PASS("ENT"),
-    /** Guest visit pass; subject = guest visit id. */
-    VISIT_PASS("VIS");
+    ATTENDANCE("an attendance QR code"),
 
-    private final String code;
+    STUDENT_ENTRY("a student entry QR code"),
 
-    QrTokenType(String code) {
-        this.code = code;
+    GUEST_PASS("a guest pass");
+
+    private final String description;
+
+    QrTokenType(String description) {
+        this.description = description;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public static Optional<QrTokenType> fromCode(String code) {
-        for (QrTokenType t : values()) {
-            if (t.code.equals(code)) {
-                return Optional.of(t);
-            }
-        }
-        return Optional.empty();
+    public String getDescription() {
+        return description;
     }
 }

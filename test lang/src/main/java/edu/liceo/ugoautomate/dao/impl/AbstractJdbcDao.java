@@ -1,7 +1,8 @@
 package edu.liceo.ugoautomate.dao.impl;
 
 import edu.liceo.ugoautomate.dao.DataAccessException;
-import edu.liceo.ugoautomate.util.DateTimeUtil;
+import edu.liceo.ugoautomate.dao.DataIntegrityException;
+import edu.liceo.ugoautomate.util.DbTime;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -10,50 +11,40 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 
-/**
- * Shared JDBC plumbing for DAO implementations: borrows pooled connections,
- * binds parameters, maps rows, and translates {@link SQLException}s.
- * All statements are prepared (never string-concatenated) to prevent SQL injection.
- */
-public abstract class AbstractJdbcDao {
+abstract class AbstractJdbcDao {
+    private static final int SQLITE_CONSTRAINT = 19;
 
-    /** Binds parameters to a prepared statement. */
-    @FunctionalInterface
-    protected interface Binder {
-        void bind(PreparedStatement ps) throws SQLException;
-    }
+    private static final String INTEGRITY_SQLSTATE_CLASS = "23";
 
-    /** Maps the current row of a result set to an object. */
     @FunctionalInterface
     protected interface RowMapper<T> {
         T map(ResultSet rs) throws SQLException;
     }
 
-    /** Work performed with a single connection inside a transaction. */
     @FunctionalInterface
-    protected interface ConnectionCallback<T> {
-        T apply(Connection connection) throws SQLException;
+    protected interface TransactionWork<T> {
+        T run(Connection connection) throws SQLException;
     }
 
-    protected static final Binder NO_PARAMS = ps -> { };
-
-    protected final DataSource dataSource;
+    private final DataSource dataSource;
 
     protected AbstractJdbcDao(DataSource dataSource) {
-        this.dataSource = dataSource;
+        this.dataSource = Objects.requireNonNull(dataSource, "dataSource");
     }
 
-    protected <T> List<T> query(String sql, Binder binder, RowMapper<T> mapper) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            binder.bind(ps);
+    protected <T> List<T> queryList(String sql, RowMapper<T> mapper, Object... params) {
+        try (Connection connection = dataSource.getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            bind(ps, params);
             try (ResultSet rs = ps.executeQuery()) {
-                // Dynamic array (ArrayList): add() at the end is amortized O(1); grows 1.5x when full.
                 List<T> rows = new ArrayList<>();
                 while (rs.next()) {
                     rows.add(mapper.map(rs));
@@ -61,77 +52,100 @@ public abstract class AbstractJdbcDao {
                 return rows;
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Unable to read data from the database.", e);
+            throw translate("query", e);
         }
     }
 
-    protected <T> Optional<T> queryOne(String sql, Binder binder, RowMapper<T> mapper) {
-        List<T> rows = query(sql, binder, mapper);
+    protected <T> Optional<T> queryOne(String sql, RowMapper<T> mapper, Object... params) {
+        List<T> rows = queryList(sql, mapper, params);
         return rows.isEmpty() ? Optional.empty() : Optional.of(rows.get(0));
     }
 
-    protected long queryLong(String sql, Binder binder) {
-        return queryOne(sql, binder, rs -> rs.getLong(1)).orElse(0L);
+    protected boolean queryExists(String sql, Object... params) {
+        return queryOne(sql, rs -> Boolean.TRUE, params).isPresent();
     }
 
-    /** @return number of affected rows */
-    protected int update(String sql, Binder binder) {
-        try (Connection c = dataSource.getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            binder.bind(ps);
+    protected int update(String sql, Object... params) {
+        try (Connection connection = dataSource.getConnection()) {
+            return update(connection, sql, params);
+        } catch (SQLException e) {
+            throw translate("update", e);
+        }
+    }
+
+    protected long insert(String sql, Object... params) {
+        try (Connection connection = dataSource.getConnection()) {
+            return insert(connection, sql, params);
+        } catch (SQLException e) {
+            throw translate("insert", e);
+        }
+    }
+
+    protected static int update(Connection connection, String sql, Object... params) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            bind(ps, params);
             return ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to save changes to the database.", e);
         }
     }
 
-    /** @return the generated primary key */
-    protected long insert(String sql, Binder binder) {
-        try (Connection c = dataSource.getConnection()) {
-            return insert(c, sql, binder);
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to save the new record.", e);
-        }
-    }
-
-    protected long insert(Connection c, String sql, Binder binder) throws SQLException {
-        try (PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            binder.bind(ps);
+    protected static long insert(Connection connection, String sql, Object... params) throws SQLException {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            bind(ps, params);
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (!keys.next()) {
-                    throw new SQLException("No generated key returned.");
+                if (keys.next()) {
+                    return keys.getLong(1);
                 }
-                return keys.getLong(1);
             }
         }
+        throw new SQLException("Insert did not return a generated key");
     }
 
-    /**
-     * Runs {@code work} on one connection inside a transaction, committing on
-     * success and rolling back on any failure.
-     */
-    protected <T> T inTransaction(ConnectionCallback<T> work) {
-        try (Connection c = dataSource.getConnection()) {
-            boolean previousAutoCommit = c.getAutoCommit();
-            c.setAutoCommit(false);
+    protected <T> T inTransaction(TransactionWork<T> work) {
+        try (Connection connection = dataSource.getConnection()) {
+            connection.setAutoCommit(false);
             try {
-                T result = work.apply(c);
-                c.commit();
+                T result = work.run(connection);
+                connection.commit();
                 return result;
             } catch (SQLException | RuntimeException e) {
-                c.rollback();
+                connection.rollback();
                 throw e;
             } finally {
-                c.setAutoCommit(previousAutoCommit);
+                connection.setAutoCommit(true);
             }
         } catch (SQLException e) {
-            throw new DataAccessException("Unable to save changes to the database.", e);
+            throw translate("transaction", e);
         }
     }
 
-    protected static LocalDateTime getDateTime(ResultSet rs, String column) throws SQLException {
-        return DateTimeUtil.fromDb(rs.getString(column));
+    private static void bind(PreparedStatement ps, Object... params) throws SQLException {
+        for (int i = 0; i < params.length; i++) {
+            Object value = params[i];
+            int index = i + 1;
+            if (value == null) {
+                ps.setNull(index, Types.NULL);
+            } else if (value instanceof LocalDateTime dateTime) {
+                ps.setString(index, DbTime.format(dateTime));
+            } else if (value instanceof LocalDate date) {
+                ps.setString(index, DbTime.format(date));
+            } else if (value instanceof Enum<?> e) {
+                ps.setString(index, e.name());
+            } else if (value instanceof Boolean b) {
+                ps.setInt(index, b ? 1 : 0);
+            } else {
+                ps.setObject(index, value);
+            }
+        }
+    }
+
+    protected static DataAccessException translate(String action, SQLException e) {
+        boolean sqliteConstraint = (e.getErrorCode() & 0xFF) == SQLITE_CONSTRAINT;
+        boolean postgresConstraint = e.getSQLState() != null && e.getSQLState().startsWith(INTEGRITY_SQLSTATE_CLASS);
+        if (sqliteConstraint || postgresConstraint) {
+            return new DataIntegrityException("Constraint violated during " + action + ": " + e.getMessage(), e);
+        }
+        return new DataAccessException("Database " + action + " failed: " + e.getMessage(), e);
     }
 
     protected static Long getNullableLong(ResultSet rs, String column) throws SQLException {
@@ -139,11 +153,17 @@ public abstract class AbstractJdbcDao {
         return rs.wasNull() ? null : value;
     }
 
-    protected static void setNullableLong(PreparedStatement ps, int index, Long value) throws SQLException {
-        if (value == null) {
-            ps.setNull(index, Types.INTEGER);
-        } else {
-            ps.setLong(index, value);
-        }
+    protected static LocalDateTime getDateTime(ResultSet rs, String column) throws SQLException {
+        return DbTime.parseDateTime(rs.getString(column));
+    }
+
+    protected static LocalDate getDate(ResultSet rs, String column) throws SQLException {
+        return DbTime.parseDate(rs.getString(column));
+    }
+
+    protected static String containsPattern(String text) {
+        String escaped = text.trim().toLowerCase(Locale.ROOT)
+                .replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        return "%" + escaped + "%";
     }
 }

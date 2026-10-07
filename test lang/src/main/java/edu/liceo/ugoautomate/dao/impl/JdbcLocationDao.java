@@ -5,18 +5,18 @@ import edu.liceo.ugoautomate.model.CampusLocation;
 import edu.liceo.ugoautomate.model.LocationType;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * SQLite implementation of {@link LocationDao}.
- */
 public class JdbcLocationDao extends AbstractJdbcDao implements LocationDao {
-
-    private static final String COLUMNS = "id, name, location_type, building, floor, description";
+    private static final String SELECT = """
+            SELECT id, name, type, building, floor, description
+            FROM locations
+            """;
+    private static final String ORDER = " ORDER BY LOWER(name)";
 
     public JdbcLocationDao(DataSource dataSource) {
         super(dataSource);
@@ -24,56 +24,64 @@ public class JdbcLocationDao extends AbstractJdbcDao implements LocationDao {
 
     @Override
     public List<CampusLocation> findAll() {
-        return query("SELECT " + COLUMNS + " FROM campus_locations ORDER BY location_type, name",
-                NO_PARAMS, JdbcLocationDao::map);
+        return queryList(SELECT + ORDER, JdbcLocationDao::map);
+    }
+
+    @Override
+    public List<CampusLocation> search(String text, LocationType type) {
+        StringBuilder sql = new StringBuilder(SELECT).append(" WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+        if (type != null) {
+            sql.append(" AND type = ?");
+            params.add(type);
+        }
+        if (text != null && !text.isBlank()) {
+            String pattern = containsPattern(text);
+            sql.append(" AND (LOWER(name) LIKE ? ESCAPE '\\' OR LOWER(building) LIKE ? ESCAPE '\\'"
+                    + " OR LOWER(description) LIKE ? ESCAPE '\\')");
+            params.add(pattern);
+            params.add(pattern);
+            params.add(pattern);
+        }
+        sql.append(ORDER);
+        return queryList(sql.toString(), JdbcLocationDao::map, params.toArray());
     }
 
     @Override
     public Optional<CampusLocation> findById(long id) {
-        return queryOne("SELECT " + COLUMNS + " FROM campus_locations WHERE id = ?",
-                ps -> ps.setLong(1, id), JdbcLocationDao::map);
+        return queryOne(SELECT + " WHERE id = ?", JdbcLocationDao::map, id);
     }
 
     @Override
-    public long insert(CampusLocation location) {
+    public long create(CampusLocation l) {
         long id = insert("""
-                INSERT INTO campus_locations (name, location_type, building, floor, description)
+                INSERT INTO locations (name, type, building, floor, description)
                 VALUES (?, ?, ?, ?, ?)
-                """, ps -> bindFields(ps, location));
-        location.setId(id);
+                """,
+                l.getName(), l.getType(), l.getBuilding(), l.getFloor(), l.getDescription());
+        l.setId(id);
         return id;
     }
 
     @Override
-    public void update(CampusLocation location) {
+    public void update(CampusLocation l) {
         update("""
-                UPDATE campus_locations
-                SET name = ?, location_type = ?, building = ?, floor = ?, description = ?
+                UPDATE locations SET name = ?, type = ?, building = ?, floor = ?, description = ?
                 WHERE id = ?
-                """, ps -> {
-            bindFields(ps, location);
-            ps.setLong(6, location.getId());
-        });
+                """,
+                l.getName(), l.getType(), l.getBuilding(), l.getFloor(), l.getDescription(), l.getId());
     }
 
     @Override
-    public boolean delete(long id) {
-        return update("DELETE FROM campus_locations WHERE id = ?", ps -> ps.setLong(1, id)) > 0;
-    }
-
-    private static void bindFields(PreparedStatement ps, CampusLocation l) throws SQLException {
-        ps.setString(1, l.getName());
-        ps.setString(2, l.getType().name());
-        ps.setString(3, l.getBuilding());
-        ps.setString(4, l.getFloor());
-        ps.setString(5, l.getDescription());
+    public void delete(long id) {
+        update("DELETE FROM locations WHERE id = ?", id);
     }
 
     private static CampusLocation map(ResultSet rs) throws SQLException {
         CampusLocation l = new CampusLocation();
         l.setId(rs.getLong("id"));
         l.setName(rs.getString("name"));
-        l.setType(LocationType.valueOf(rs.getString("location_type")));
+        l.setType(LocationType.valueOf(rs.getString("type")));
         l.setBuilding(rs.getString("building"));
         l.setFloor(rs.getString("floor"));
         l.setDescription(rs.getString("description"));

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.student.MyAttendanceController" styleClass="page">
+    <Label text="My Attendance" styleClass="page-title"/>
+    <Label text="Every class and event where your attendance was recorded." styleClass="page-subtitle" wrapText="true"/>
+    <FlowPane styleClass="toolbar">
+        <Button text="Refresh" onAction="#reload"/>
+        <Label fx:id="count" styleClass="muted"/>
+    </FlowPane>
+    <TableView fx:id="table" minHeight="260" VBox.vgrow="ALWAYS"/>
+</VBox>

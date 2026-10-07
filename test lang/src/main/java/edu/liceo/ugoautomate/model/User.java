@@ -1,34 +1,31 @@
 package edu.liceo.ugoautomate.model;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-/**
- * Base class for every account in the system. Concrete subclasses add the
- * role-specific information ({@link Student}, {@link Guest}, {@link Administrator}).
- */
 public abstract class User {
-
     private long id;
-    private String username;
-    private String passwordHash;
-    private String fullName;
+    private final Role role;
     private String email;
+    private String passwordHash;
+    private String firstName;
+    private String lastName;
     private String contactNumber;
     private boolean active = true;
     private LocalDateTime createdAt;
 
-    protected User() {
+    protected User(Role role) {
+        this.role = Objects.requireNonNull(role, "role");
     }
 
-    /** @return the role this account type represents */
-    public abstract Role getRole();
+    public abstract String getSummary();
 
-    /**
-     * @return the identifier shown to staff when verifying this user
-     *         (student number for students, username otherwise)
-     */
-    public String getDisplayIdentifier() {
-        return username;
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    public boolean hasRole(Role other) {
+        return role == other;
     }
 
     public long getId() {
@@ -39,12 +36,16 @@ public abstract class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public Role getRole() {
+        return role;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPasswordHash() {
@@ -55,20 +56,20 @@ public abstract class User {
         this.passwordHash = passwordHash;
     }
 
-    public String getFullName() {
-        return fullName;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getEmail() {
-        return email;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getContactNumber() {
@@ -96,7 +97,23 @@ public abstract class User {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof User other)) {
+            return false;
+        }
+        return id != 0 && id == other.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
+
+    @Override
     public String toString() {
-        return fullName + " (" + getRole().getDisplayName() + ")";
+        return role.getLabel() + " #" + id + " " + getFullName() + " <" + email + ">";
     }
 }

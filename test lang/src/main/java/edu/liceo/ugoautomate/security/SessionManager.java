@@ -4,12 +4,7 @@ import edu.liceo.ugoautomate.model.User;
 
 import java.util.Optional;
 
-/**
- * Holds the currently signed-in user of this desktop client. Thread-safe so
- * background workers can read the session.
- */
-public final class SessionManager {
-
+public class SessionManager {
     private volatile User currentUser;
 
     public void start(User user) {
@@ -20,11 +15,14 @@ public final class SessionManager {
         this.currentUser = null;
     }
 
-    public Optional<User> currentUser() {
+    public Optional<User> current() {
         return Optional.ofNullable(currentUser);
     }
 
-    public boolean isLoggedIn() {
-        return currentUser != null;
+    public void refresh(User updated) {
+        User current = currentUser;
+        if (current != null && current.getId() == updated.getId()) {
+            this.currentUser = updated;
+        }
     }
 }

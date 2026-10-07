@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.AccountsController" styleClass="page">
+    <Label text="Accounts" styleClass="page-title"/>
+    <Label text="Manage student, guest, and administrator accounts." styleClass="page-subtitle" wrapText="true"/>
+
+    <FlowPane styleClass="toolbar">
+        <ComboBox fx:id="roleFilter" onAction="#reload"/>
+        <TextField fx:id="search" promptText="Name, email, or student ID" prefColumnCount="20" onAction="#reload"/>
+        <Button text="Search" onAction="#reload"/>
+        <Label fx:id="count" styleClass="muted"/>
+    </FlowPane>
+    <FlowPane styleClass="toolbar">
+        <Button text="Edit..." styleClass="primary" onAction="#edit"/>
+        <Button text="Activate / Deactivate" onAction="#toggleActive"/>
+        <Button text="Reset password..." onAction="#resetPassword"/>
+        <Button text="Delete" styleClass="danger" onAction="#delete"/>
+    </FlowPane>
+
+    <TableView fx:id="table" minHeight="260" VBox.vgrow="ALWAYS"/>
+</VBox>

@@ -1,89 +1,52 @@
 package edu.liceo.ugoautomate.service;
 
-/**
- * Requested profile changes. Fields left {@code null} are not changed.
- * {@link ProfileService} applies only the fields the user's role may edit.
- */
-public class ProfileUpdate {
+import edu.liceo.ugoautomate.model.Administrator;
+import edu.liceo.ugoautomate.model.Guest;
+import edu.liceo.ugoautomate.model.Student;
+import edu.liceo.ugoautomate.model.User;
+import edu.liceo.ugoautomate.util.Validation;
 
-    private String fullName;
-    private String email;
-    private String contactNumber;
-    private String course;
-    private Integer yearLevel;
-    private String purposeOfVisit;
-    private String personToVisit;
-    private String office;
-
-    public String getFullName() {
-        return fullName;
+public record ProfileUpdate(
+        String firstName,
+        String lastName,
+        String contactNumber,
+        String course,
+        Integer yearLevel,
+        String purposeOfVisit,
+        String personToVisit,
+        String position) {
+    public static ProfileUpdate of(User user) {
+        String course = null;
+        Integer year = null;
+        String purpose = null;
+        String person = null;
+        String position = null;
+        if (user instanceof Student s) {
+            course = s.getCourse();
+            year = s.getYearLevel();
+        } else if (user instanceof Guest g) {
+            purpose = g.getPurposeOfVisit();
+            person = g.getPersonToVisit();
+        } else if (user instanceof Administrator a) {
+            position = a.getPosition();
+        }
+        return new ProfileUpdate(user.getFirstName(), user.getLastName(), user.getContactNumber(),
+                course, year, purpose, person, position);
     }
 
-    public ProfileUpdate setFullName(String fullName) {
-        this.fullName = fullName;
-        return this;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public ProfileUpdate setEmail(String email) {
-        this.email = email;
-        return this;
-    }
-
-    public String getContactNumber() {
-        return contactNumber;
-    }
-
-    public ProfileUpdate setContactNumber(String contactNumber) {
-        this.contactNumber = contactNumber;
-        return this;
-    }
-
-    public String getCourse() {
-        return course;
-    }
-
-    public ProfileUpdate setCourse(String course) {
-        this.course = course;
-        return this;
-    }
-
-    public Integer getYearLevel() {
-        return yearLevel;
-    }
-
-    public ProfileUpdate setYearLevel(Integer yearLevel) {
-        this.yearLevel = yearLevel;
-        return this;
-    }
-
-    public String getPurposeOfVisit() {
-        return purposeOfVisit;
-    }
-
-    public ProfileUpdate setPurposeOfVisit(String purposeOfVisit) {
-        this.purposeOfVisit = purposeOfVisit;
-        return this;
-    }
-
-    public String getPersonToVisit() {
-        return personToVisit;
-    }
-
-    public ProfileUpdate setPersonToVisit(String personToVisit) {
-        this.personToVisit = personToVisit;
-        return this;
-    }
-
-    public String getOffice() {
-        return office;
-    }
-
-    public ProfileUpdate setOffice(String office) {
-        this.office = office;
-        return this;
+    public void applyTo(User user) {
+        user.setFirstName(Validation.required(firstName, "First name", 60));
+        user.setLastName(Validation.required(lastName, "Last name", 60));
+        boolean contactRequired = user instanceof Guest;
+        user.setContactNumber(Validation.contactNumber(contactNumber, contactRequired));
+        if (user instanceof Student s) {
+            s.setCourse(Validation.required(course, "Course", 100));
+            s.setYearLevel(Validation.yearLevel(yearLevel == null ? 0 : yearLevel));
+        } else if (user instanceof Guest g) {
+            g.setPurposeOfVisit(Validation.required(purposeOfVisit, "Purpose of visit", 200));
+            g.setPersonToVisit(Validation.required(personToVisit, "Person/office to visit", 100));
+        } else if (user instanceof Administrator a) {
+            a.setPosition(Validation.optional(position, 100, "Position"));
+        }
     }
 }

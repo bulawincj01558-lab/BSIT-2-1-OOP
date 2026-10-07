@@ -1,26 +1,23 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * Category of a campus location shown in the Campus Navigator.
- */
 public enum LocationType {
     BUILDING("Building"),
     OFFICE("Office"),
     FACILITY("Facility"),
     LANDMARK("Landmark");
 
-    private final String displayName;
+    private final String label;
 
-    LocationType(String displayName) {
-        this.displayName = displayName;
+    LocationType(String label) {
+        this.label = label;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getLabel() {
+        return label;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return label;
     }
 }

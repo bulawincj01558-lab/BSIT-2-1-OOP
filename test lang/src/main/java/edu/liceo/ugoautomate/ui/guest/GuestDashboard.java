@@ -2,38 +2,38 @@ package edu.liceo.ugoautomate.ui.guest;
 
 import edu.liceo.ugoautomate.AppContext;
 import edu.liceo.ugoautomate.model.User;
-import edu.liceo.ugoautomate.ui.common.CampusNavigatorPanel;
-import edu.liceo.ugoautomate.ui.common.DashboardFrame;
-import edu.liceo.ugoautomate.ui.common.DataStructuresPanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel.Shortcut;
-import edu.liceo.ugoautomate.ui.common.ProfilePanel;
+import edu.liceo.ugoautomate.ui.common.DashboardController;
+import edu.liceo.ugoautomate.ui.common.DataStructuresController;
+import edu.liceo.ugoautomate.ui.common.HomeController;
+import edu.liceo.ugoautomate.ui.common.HomeController.Shortcut;
+import edu.liceo.ugoautomate.ui.common.ProfileController;
+import edu.liceo.ugoautomate.ui.common.Views;
+import edu.liceo.ugoautomate.ui.common.Views.View;
 
-/**
- * Guest dashboard: visit registration and passes, navigator, and profile.
- */
-public class GuestDashboard extends DashboardFrame {
+public final class GuestDashboard {
+    private static final String HOME = "Home";
+    private static final String VISITS = "My Visits";
+    private static final String DATA_STRUCTURES = "Data Structures";
+    private static final String PROFILE = "My Profile";
 
-    static final String HOME = "Home";
-    static final String VISITS = "My Visits";
-    static final String NAVIGATOR = "Campus Navigator";
-    static final String PROFILE = "My Profile";
-    static final String DATA_STRUCTURES = "Data Structures";
+    private GuestDashboard() {
+    }
 
-    public GuestDashboard(AppContext ctx) {
-        super(ctx, "Guest");
-        String firstName = ctx.session().currentUser().map(User::getFullName).orElse("").split(" ")[0];
+    public static View<DashboardController> create(AppContext ctx, User guest) {
+        View<DashboardController> view = Views.load(ctx, "common/Dashboard.fxml");
+        DashboardController d = view.controller();
+        d.setRole("Guest");
 
-        addPage(HOME, new HomePanel("Welcome to Liceo, " + firstName + "!",
-                "Register your visit before entering campus, then show your visit pass at the gate.", this::showPage,
-                new Shortcut(VISITS, "Register today's visit and open the visit pass QR code for the gate."),
-                new Shortcut(NAVIGATOR, "Look up the office or building you are visiting and where it is."),
-                new Shortcut(PROFILE, "Update your contact details and default visit information."),
-                new Shortcut(DATA_STRUCTURES, "See the arrays, lists, stacks, and queues used in this app, with memory use and Big-O time complexity.")));
-        addPage(VISITS, new GuestVisitsPanel(ctx));
-        addPage(NAVIGATOR, new CampusNavigatorPanel(ctx));
-        addPage(PROFILE, new ProfilePanel(ctx));
-        addPage(DATA_STRUCTURES, new DataStructuresPanel());
-        showPage(HOME);
+        d.addPage(HOME, HomeController.create(ctx, "Welcome, " + guest.getFirstName() + "!", guest.getSummary(), d::showPage,
+                new Shortcut(VISITS, "Register your visit before coming to campus and get your guest pass QR."),
+                new Shortcut(DATA_STRUCTURES, "See the data structures behind the app, with memory allocation and time complexity."),
+                new Shortcut(PROFILE, "Update your contact details or change your password.")));
+        d.addPage(VISITS, Views.load(ctx, "guest/GuestVisits.fxml"));
+        d.addPage(DATA_STRUCTURES, DataStructuresController.create(ctx, d));
+        View<ProfileController> profile = Views.load(ctx, "common/Profile.fxml");
+        profile.controller().setOnSaved(d::refreshHeader);
+        d.addPage(PROFILE, profile);
+        d.showFirstPage();
+        return view;
     }
 }

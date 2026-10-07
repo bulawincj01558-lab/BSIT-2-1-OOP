@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.DisciplineEditController" styleClass="page" prefWidth="600">
+    <Label fx:id="heading" styleClass="page-title"/>
+    <GridPane styleClass="form">
+        <columnConstraints>
+            <ColumnConstraints minWidth="140"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label text="Student ID" GridPane.rowIndex="0"/>
+        <HBox spacing="8" GridPane.rowIndex="0" GridPane.columnIndex="1">
+            <TextField fx:id="studentNumber" promptText="2023-00123" HBox.hgrow="ALWAYS" onAction="#findStudent"/>
+            <Button fx:id="findButton" text="Find" onAction="#findStudent"/>
+        </HBox>
+        <Label text="Student" GridPane.rowIndex="1"/>
+        <Label fx:id="studentName" styleClass="strong" text="-" wrapText="true" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Incident date" GridPane.rowIndex="2"/>
+        <DatePicker fx:id="incidentDate" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Offense" GridPane.rowIndex="3"/>
+        <ComboBox fx:id="offense" editable="true" maxWidth="Infinity" promptText="Choose or type the offense"
+                  GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Severity" GridPane.rowIndex="4"/>
+        <ComboBox fx:id="severity" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="What happened" GridPane.rowIndex="5" GridPane.valignment="TOP"/>
+        <TextArea fx:id="description" wrapText="true" prefRowCount="3" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label text="Sanction (optional)" GridPane.rowIndex="6"/>
+        <TextField fx:id="sanction" promptText="e.g. Written warning, community service" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label text="Status" GridPane.rowIndex="7"/>
+        <ComboBox fx:id="status" maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+        <Label text="Resolution notes" GridPane.rowIndex="8" GridPane.valignment="TOP"/>
+        <TextArea fx:id="resolution" wrapText="true" prefRowCount="2" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+    </GridPane>
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Cancel" cancelButton="true" onAction="#cancel"/>
+        <Button text="Save" styleClass="primary" defaultButton="true" onAction="#save"/>
+    </HBox>
+</VBox>

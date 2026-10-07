@@ -2,43 +2,20 @@ package edu.liceo.ugoautomate.model;
 
 import java.time.LocalDateTime;
 
-/**
- * An authorized attendance activity (class session or event) for which an
- * administrator can generate a QR code.
- * <p>
- * The {@code qrNonce} binds issued QR codes to this session: regenerating the
- * nonce immediately invalidates every previously printed or displayed code.
- */
 public class AttendanceSession {
-
-    /** Students may check in this many minutes before the scheduled start. */
-    public static final int EARLY_CHECK_IN_MINUTES = 15;
-
     private long id;
     private String title;
-    private SessionType sessionType;
-    private String venue;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String qrNonce;
-    private boolean active = true;
+    private SessionType type;
+    private Long locationId;
+    private String locationName;
+    private LocalDateTime startsAt;
+    private LocalDateTime endsAt;
     private Long createdBy;
     private LocalDateTime createdAt;
     private int attendeeCount;
 
-    /**
-     * @param time the moment to test
-     * @return true when the session is active and {@code time} falls inside the
-     *         check-in window [start - early grace, end]
-     */
     public boolean isOpenAt(LocalDateTime time) {
-        return active
-                && !time.isBefore(checkInOpensAt())
-                && !time.isAfter(endTime);
-    }
-
-    public LocalDateTime checkInOpensAt() {
-        return startTime.minusMinutes(EARLY_CHECK_IN_MINUTES);
+        return !time.isBefore(startsAt) && !time.isAfter(endsAt);
     }
 
     public long getId() {
@@ -57,52 +34,44 @@ public class AttendanceSession {
         this.title = title;
     }
 
-    public SessionType getSessionType() {
-        return sessionType;
+    public SessionType getType() {
+        return type;
     }
 
-    public void setSessionType(SessionType sessionType) {
-        this.sessionType = sessionType;
+    public void setType(SessionType type) {
+        this.type = type;
     }
 
-    public String getVenue() {
-        return venue;
+    public Long getLocationId() {
+        return locationId;
     }
 
-    public void setVenue(String venue) {
-        this.venue = venue;
+    public void setLocationId(Long locationId) {
+        this.locationId = locationId;
     }
 
-    public LocalDateTime getStartTime() {
-        return startTime;
+    public String getLocationName() {
+        return locationName;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
-    public LocalDateTime getEndTime() {
-        return endTime;
+    public LocalDateTime getStartsAt() {
+        return startsAt;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
+    public void setStartsAt(LocalDateTime startsAt) {
+        this.startsAt = startsAt;
     }
 
-    public String getQrNonce() {
-        return qrNonce;
+    public LocalDateTime getEndsAt() {
+        return endsAt;
     }
 
-    public void setQrNonce(String qrNonce) {
-        this.qrNonce = qrNonce;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setEndsAt(LocalDateTime endsAt) {
+        this.endsAt = endsAt;
     }
 
     public Long getCreatedBy() {
@@ -121,7 +90,6 @@ public class AttendanceSession {
         this.createdAt = createdAt;
     }
 
-    /** @return number of attendance records (populated by list queries) */
     public int getAttendeeCount() {
         return attendeeCount;
     }

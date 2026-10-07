@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root type="javafx.scene.layout.HBox" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+         styleClass="banner">
+    <Label fx:id="icon" styleClass="banner-icon"/>
+    <VBox spacing="4" HBox.hgrow="ALWAYS">
+        <Label fx:id="title" styleClass="banner-title" wrapText="true"/>
+        <Label fx:id="message" wrapText="true"/>
+    </VBox>
+</fx:root>

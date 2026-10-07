@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.TimeSpinner?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.ClassEditController" styleClass="page" prefWidth="580">
+    <Label fx:id="heading" styleClass="page-title"/>
+    <GridPane styleClass="form">
+        <columnConstraints>
+            <ColumnConstraints minWidth="130"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+        <Label text="Term" GridPane.rowIndex="0"/>
+        <TextField fx:id="term" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label text="Subject code" GridPane.rowIndex="1"/>
+        <TextField fx:id="subjectCode" promptText="IT 211" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Subject title" GridPane.rowIndex="2"/>
+        <TextField fx:id="subjectTitle" promptText="Object-Oriented Programming" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Units" GridPane.rowIndex="3"/>
+        <Spinner fx:id="units" editable="true" maxWidth="120" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Section" GridPane.rowIndex="4"/>
+        <ComboBox fx:id="section" editable="true" maxWidth="Infinity" promptText="BSIT 2-A" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="Instructor" GridPane.rowIndex="5"/>
+        <ComboBox fx:id="instructor" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label text="Days" GridPane.rowIndex="6"/>
+        <FlowPane fx:id="days" hgap="12" vgap="6" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label text="Start time" GridPane.rowIndex="7"/>
+        <TimeSpinner fx:id="startTime" maxWidth="Infinity" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+        <Label text="End time" GridPane.rowIndex="8"/>
+        <TimeSpinner fx:id="endTime" maxWidth="Infinity" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+        <Label text="Room (optional)" GridPane.rowIndex="9"/>
+        <ComboBox fx:id="room" editable="true" maxWidth="Infinity" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+    </GridPane>
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Cancel" cancelButton="true" onAction="#cancel"/>
+        <Button text="Save" styleClass="primary" defaultButton="true" onAction="#save"/>
+    </HBox>
+</VBox>

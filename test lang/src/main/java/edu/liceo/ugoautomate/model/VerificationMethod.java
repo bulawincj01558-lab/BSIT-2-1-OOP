@@ -1,24 +1,22 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * How an entrant's authorization was verified at the gate.
- */
 public enum VerificationMethod {
-    QR_CODE("QR Code"),
-    CREDENTIALS("Account Credentials");
+    WEBCAM("Webcam"),
+    IMAGE_FILE("Image file"),
+    MANUAL_ENTRY("Manual entry");
 
-    private final String displayName;
+    private final String label;
 
-    VerificationMethod(String displayName) {
-        this.displayName = displayName;
+    VerificationMethod(String label) {
+        this.label = label;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getLabel() {
+        return label;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return label;
     }
 }

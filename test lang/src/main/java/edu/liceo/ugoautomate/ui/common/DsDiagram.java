@@ -1,185 +1,475 @@
 package edu.liceo.ugoautomate.ui.common;
 
-import javax.swing.JComponent;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.Stroke;
+import com.google.zxing.common.BitMatrix;
+import edu.liceo.ugoautomate.ds.BTreeModel;
+import javafx.geometry.Orientation;
+import javafx.geometry.VPos;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
-/**
- * Small memory-layout diagram for a linear data structure. Cells shrink to
- * fit the available width so diagrams stay readable on narrow screens.
- */
-public class DsDiagram extends JComponent {
+import java.util.ArrayList;
+import java.util.List;
 
-    /** Which structure to draw. */
-    public enum Kind { ARRAY, DYNAMIC_ARRAY, LINKED_LIST, STACK, QUEUE }
+public class DsDiagram extends Region {
+    private enum Mode { EMPTY, BIT_GRID, CELLS, HASH, STACK, QUEUE, LINKED, BTREE }
 
-    private static final Color CELL = new Color(0xF1E1E4);
-    private static final Color CELL_BORDER = new Color(0x7A0019);
-    private static final Color EMPTY_BORDER = new Color(0xB9AEB1);
-    private static final Color TEXT = new Color(0x2A1418);
-    private static final Color NOTE = new Color(0x5F5F66);
+    private static final Color CELL = Color.web("#FFF7E0");
+    private static final Color CELL_BORDER = Color.web("#B08A2E");
+    private static final Color EMPTY_CELL = Color.web("#EEEEEE");
+    private static final Color NODE = Color.web("#E6EEFA");
+    private static final Color NODE_BORDER = Color.web("#4A74C9");
+    private static final Color ACCENT = Color.web("#7A1F2B");
+    private static final Color MUTED = Color.web("#5F5A57");
+    private static final Color LIGHT = Color.web("#C0C0C0");
+    private static final double PAD = 12;
+    private static final double KEY_LINE = 17;
+    private static final double LEVEL_GAP = 40;
 
-    private final Kind kind;
+    private final Canvas canvas = new Canvas();
+    private final Font font = Font.font("System", 12);
+    private final Text measure = new Text();
 
-    public DsDiagram(Kind kind) {
-        this.kind = kind;
-        int height = switch (kind) {
-            case STACK -> 176;
-            case LINKED_LIST -> 118;
-            default -> 104;
-        };
-        setPreferredSize(new Dimension(360, height));
-        setMinimumSize(new Dimension(200, height));
+    private Mode mode = Mode.EMPTY;
+    private String emptyMessage = "";
+    private BitMatrix matrix;
+    private List<String> items = List.of();
+    private int capacity;
+    private BTreeModel tree;
+
+    public DsDiagram() {
+        getChildren().add(canvas);
+        measure.setFont(font);
+        getStyleClass().add("diagram-frame");
+    }
+
+    public void showEmpty(String message) {
+        emptyMessage = message;
+        set(Mode.EMPTY);
+    }
+
+    public void showBitGrid(BitMatrix m) {
+        matrix = m;
+        set(Mode.BIT_GRID);
+    }
+
+    public void showCells(List<String> values, int arrayCapacity) {
+        items = List.copyOf(values);
+        capacity = Math.max(arrayCapacity, values.size());
+        set(Mode.CELLS);
+    }
+
+    public void showHashTable(List<String> keys, int bucketCount) {
+        items = List.copyOf(keys);
+        capacity = bucketCount;
+        set(Mode.HASH);
+    }
+
+    public void showStack(List<String> topFirst) {
+        items = List.copyOf(topFirst);
+        set(Mode.STACK);
+    }
+
+    public void showQueue(List<String> oldestFirst) {
+        items = List.copyOf(oldestFirst);
+        set(Mode.QUEUE);
+    }
+
+    public void showLinkedList(List<String> inOrder) {
+        items = List.copyOf(inOrder);
+        set(Mode.LINKED);
+    }
+
+    public void showBTree(BTreeModel model) {
+        tree = model;
+        set(Mode.BTREE);
+    }
+
+    private void set(Mode newMode) {
+        mode = newMode;
+        requestLayout();
+        draw();
+    }
+
+    public static int bucketOf(String key, int bucketCount) {
+        int h = key.hashCode();
+        return (h ^ (h >>> 16)) & (bucketCount - 1);
     }
 
     @Override
-    protected void paintComponent(Graphics graphics) {
-        Graphics2D g = (Graphics2D) graphics.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        switch (kind) {
-            case ARRAY -> drawArray(g);
-            case DYNAMIC_ARRAY -> drawDynamicArray(g);
-            case LINKED_LIST -> drawLinkedList(g);
-            case STACK -> drawStack(g);
-            case QUEUE -> drawQueue(g);
-        }
-        g.dispose();
+    public Orientation getContentBias() {
+        return Orientation.HORIZONTAL;
     }
 
-    private void drawArray(Graphics2D g) {
-        String[] values = {"BSIT", "BSCS", "BSIS", "BSN", "BSA", "BSBA"};
-        int cell = cellWidth(values.length, 70);
-        note(g, "One contiguous block, fixed length " + values.length + ", index -> address", 4, 14);
-        for (int i = 0; i < values.length; i++) {
-            int x = 4 + i * cell;
-            box(g, x, 26, cell, 38, values[i], true);
-            centered(g, "[" + i + "]", x, 80, cell, NOTE);
+    @Override
+    protected double computeMinWidth(double height) {
+        return mode == Mode.BTREE ? requiredWidth() : 200;
+    }
+
+    @Override
+    protected double computePrefWidth(double height) {
+        return Math.max(700, requiredWidth());
+    }
+
+    @Override
+    protected double computePrefHeight(double width) {
+        return heightFor(width > 0 ? width : 700);
+    }
+
+    @Override
+    protected double computeMinHeight(double width) {
+        return computePrefHeight(width);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        canvas.setWidth(getWidth());
+        canvas.setHeight(getHeight());
+        draw();
+    }
+
+    private double requiredWidth() {
+        if (mode != Mode.BTREE || tree == null) {
+            return 280;
+        }
+        double widest = 0;
+        for (List<BTreeModel.Node> level : tree.levels()) {
+            double w = 0;
+            for (BTreeModel.Node node : level) {
+                w += nodeWidth(node) + 14;
+            }
+            widest = Math.max(widest, w);
+        }
+        return widest + 2 * PAD;
+    }
+
+    private double heightFor(double width) {
+        double inner = Math.max(200, width - 2 * PAD);
+        return switch (mode) {
+            case EMPTY -> 60;
+            case BIT_GRID -> matrix == null ? 60 : bitCell(inner) * matrix.getHeight() + 50;
+            case CELLS -> rows(capacity, perRow(inner, 120)) * 58 + 40;
+            case HASH -> {
+                int cols = Math.max(1, (int) (inner / 380));
+                yield (capacity + cols - 1) / cols * 26 + 40;
+            }
+            case STACK -> Math.max(1, items.size()) * 38 + 60;
+            case QUEUE -> rows(Math.max(1, items.size()), perRow(inner, 200)) * 58 + 50;
+            case LINKED -> rows(Math.max(1, items.size()), perRow(inner, 200)) * 66 + 40;
+            case BTREE -> tree == null ? 60 : bTreeHeight();
+        };
+    }
+
+    private int bitCell(double inner) {
+        return (int) Math.min(8, Math.max(3, (inner - 20) / matrix.getWidth()));
+    }
+
+    private static int perRow(double width, double cellWidth) {
+        return Math.max(1, (int) (width / cellWidth));
+    }
+
+    private static int rows(int count, int perRow) {
+        return Math.max(1, (count + perRow - 1) / perRow);
+    }
+
+    private void draw() {
+        double width = canvas.getWidth();
+        double height = canvas.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+        GraphicsContext g = canvas.getGraphicsContext2D();
+        g.setFill(Color.WHITE);
+        g.fillRect(0, 0, width, height);
+        g.setFont(font);
+        g.setLineWidth(1);
+        double inner = width - 2 * PAD;
+        switch (mode) {
+            case EMPTY -> caption(g, emptyMessage, PAD, 34);
+            case BIT_GRID -> paintBitGrid(g, inner);
+            case CELLS -> paintCells(g, inner);
+            case HASH -> paintHash(g, inner);
+            case STACK -> paintStack(g, inner);
+            case QUEUE -> paintQueue(g, inner);
+            case LINKED -> paintLinked(g, inner);
+            case BTREE -> paintBTree(g, width);
         }
     }
 
-    private void drawDynamicArray(Graphics2D g) {
-        int capacity = 10;
-        int size = 6;
-        int cell = cellWidth(capacity, 52);
-        note(g, "size = " + size + ", capacity = " + capacity + "  (grows x1.5 when full)", 4, 14);
-        for (int i = 0; i < capacity; i++) {
-            int x = 4 + i * cell;
-            box(g, x, 26, cell, 38, i < size ? "r" + (i + 1) : "", i < size);
-            centered(g, String.valueOf(i), x, 80, cell, NOTE);
-        }
-    }
-
-    private void drawLinkedList(Graphics2D g) {
-        String[] items = {"scan 4", "scan 3", "scan 2", "scan 1"};
-        int gap = 22;
-        int node = Math.min(110, (getWidth() - 8 - gap * (items.length - 1)) / items.length);
-        note(g, "Separate nodes anywhere on the heap, linked by prev/next references", 4, 14);
-        int y = 40;
-        int h = 40;
-        for (int i = 0; i < items.length; i++) {
-            int x = 4 + i * (node + gap);
-            g.setColor(CELL);
-            g.fillRoundRect(x, y, node, h, 8, 8);
-            g.setColor(CELL_BORDER);
-            g.setStroke(new BasicStroke(1.6f));
-            g.drawRoundRect(x, y, node, h, 8, 8);
-            int part = node / 5;
-            g.drawLine(x + part, y, x + part, y + h);
-            g.drawLine(x + node - part, y, x + node - part, y + h);
-            centered(g, items[i], x + part, y + h / 2 + 5, node - 2 * part, TEXT);
-            if (i < items.length - 1) {
-                int x2 = x + node + gap;
-                arrow(g, x + node - part / 2, y + 12, x2, y + 12);        // next
-                arrow(g, x2 + part / 2, y + h - 12, x + node, y + h - 12); // prev
+    private void paintBitGrid(GraphicsContext g, double inner) {
+        int n = matrix.getWidth();
+        int cell = bitCell(inner);
+        double x0 = PAD;
+        double y0 = PAD + 18;
+        caption(g, "Each square is one bit; every 32 squares in a row share one int (red lines).", PAD, PAD + 8);
+        for (int y = 0; y < matrix.getHeight(); y++) {
+            for (int x = 0; x < n; x++) {
+                g.setFill(matrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                g.fillRect(x0 + x * cell, y0 + y * cell, cell, cell);
             }
         }
-        centered(g, "head", 4, y - 6, node, NOTE);
-        centered(g, "tail", 4 + (items.length - 1) * (node + gap), y - 6, node, NOTE);
-        note(g, "[prev | item | next]  ->  addFirst / removeLast touch only one end", 4, y + h + 20);
-    }
-
-    private void drawStack(Graphics2D g) {
-        String[] items = {"Accounts", "Attendance Sessions", "Entry Verification", "Home"};
-        int w = Math.min(190, getWidth() - 150);
-        int x = 8;
-        int h = 30;
-        note(g, "Back-button history (LIFO): last page visited is on top", 4, 14);
-        for (int i = 0; i < items.length; i++) {
-            box(g, x, 26 + i * h, w, h, items[i], true);
+        g.setStroke(Color.web("#DDDDDD"));
+        g.strokeRect(x0, y0, n * cell, matrix.getHeight() * cell);
+        g.setStroke(Color.rgb(220, 40, 40, 0.7));
+        g.setLineWidth(2);
+        for (int boundary = 32; boundary < n; boundary += 32) {
+            g.strokeLine(x0 + boundary * cell, y0 - 4, x0 + boundary * cell, y0 + matrix.getHeight() * cell + 4);
         }
-        arrow(g, x + w + 60, 26 + h / 2, x + w + 6, 26 + h / 2);
-        g.setColor(TEXT);
-        g.drawString("top", x + w + 66, 26 + h / 2 + 4);
-        g.setColor(NOTE);
-        g.drawString("push() adds here", x + w + 12, 26 + h + 18);
-        g.drawString("pop() removes here", x + w + 12, 26 + h + 34);
+        g.setLineWidth(1);
     }
 
-    private void drawQueue(Graphics2D g) {
-        String[] items = {"code A", "code B", "code C", "code D", ""};
-        int cell = cellWidth(items.length, 80);
-        note(g, "Pending scans (FIFO): first in is first verified", 4, 14);
-        for (int i = 0; i < items.length; i++) {
-            box(g, 4 + i * cell, 26, cell, 38, items[i], !items[i].isEmpty());
+    private void paintCells(GraphicsContext g, double inner) {
+        double cellW = 120;
+        int perRow = perRow(inner, cellW);
+        caption(g, "Contiguous Object[] - index i is at base + 16 + 4 × i bytes. Grey = spare capacity (null).", PAD, PAD + 8);
+        for (int i = 0; i < capacity; i++) {
+            double x = PAD + (i % perRow) * cellW;
+            double y = PAD + 22 + (i / perRow) * 58;
+            boolean used = i < items.size();
+            box(g, x, y + 14, cellW, 34, used ? items.get(i) : "null", used ? CELL : EMPTY_CELL,
+                    used ? CELL_BORDER : LIGHT, used ? Color.BLACK : Color.GRAY);
+            g.setFill(MUTED);
+            g.fillText("[" + i + "]", x + 4, y + 10);
         }
-        g.setColor(NOTE);
-        g.drawString("front: poll()", 4, 84);
-        String rear = "rear: offer()";
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(rear, 4 + items.length * cell - fm.stringWidth(rear), 84);
     }
 
-    // ------------------------------------------------------------ helpers
-
-    private int cellWidth(int cells, int max) {
-        return Math.max(26, Math.min(max, (getWidth() - 8) / cells));
-    }
-
-    private void box(Graphics2D g, int x, int y, int w, int h, String text, boolean filled) {
-        Stroke original = g.getStroke();
-        if (filled) {
-            g.setColor(CELL);
-            g.fillRect(x, y, w, h);
-            g.setColor(CELL_BORDER);
-            g.setStroke(new BasicStroke(1.6f));
-        } else {
-            g.setColor(EMPTY_BORDER);
-            g.setStroke(new BasicStroke(1.2f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, new float[]{4f, 3f}, 0f));
+    private void paintHash(GraphicsContext g, double inner) {
+        List<List<String>> buckets = new ArrayList<>();
+        for (int i = 0; i < capacity; i++) {
+            buckets.add(new ArrayList<>());
         }
-        g.drawRect(x, y, w, h);
-        g.setStroke(original);
-        centered(g, text, x, y + h / 2 + 5, w, TEXT);
-    }
-
-    private static void centered(Graphics2D g, String text, int x, int baseline, int width, Color color) {
-        FontMetrics fm = g.getFontMetrics();
-        String shown = text;
-        while (fm.stringWidth(shown) > width - 4 && shown.length() > 1) {
-            shown = shown.substring(0, shown.length() - 1);
+        for (String key : items) {
+            buckets.get(bucketOf(key, capacity)).add(key);
         }
-        g.setColor(color);
-        g.drawString(shown, x + (width - fm.stringWidth(shown)) / 2, baseline);
+        int cols = Math.max(1, (int) (inner / 380));
+        double colWidth = inner / cols;
+        int perCol = (capacity + cols - 1) / cols;
+        caption(g, "bucket = (hash ^ hash >>> 16) & " + (capacity - 1) + "   - collisions are chained with next pointers", PAD, PAD + 8);
+        for (int i = 0; i < capacity; i++) {
+            double x = PAD + (i / perCol) * colWidth;
+            double y = PAD + 20 + (i % perCol) * 26;
+            List<String> chain = buckets.get(i);
+            box(g, x, y, 40, 22, String.valueOf(i), chain.isEmpty() ? EMPTY_CELL : CELL,
+                    chain.isEmpty() ? LIGHT : CELL_BORDER, Color.BLACK);
+            double nodeW = chain.isEmpty() ? 0 : Math.min(150, (colWidth - 70) / chain.size() - 16);
+            double nx = x + 58;
+            for (String key : chain) {
+                arrow(g, nx - 16, y + 11, nx, y + 11);
+                box(g, nx, y, Math.max(40, nodeW), 22, key, NODE, NODE_BORDER, Color.BLACK);
+                nx += Math.max(40, nodeW) + 16;
+            }
+        }
     }
 
-    private static void note(Graphics2D g, String text, int x, int baseline) {
-        g.setColor(NOTE);
-        g.drawString(text, x, baseline);
+    private void paintStack(GraphicsContext g, double inner) {
+        if (items.isEmpty()) {
+            caption(g, "The stack is empty.", PAD, PAD + 20);
+            return;
+        }
+        double w = Math.min(320, inner - 120);
+        double x = PAD + 90;
+        caption(g, "push/pop happen only at the top (O(1)). Press Back to pop.", PAD, PAD + 8);
+        for (int i = 0; i < items.size(); i++) {
+            double y = PAD + 22 + i * 38;
+            box(g, x, y, w, 32, items.get(i), i == 0 ? CELL : NODE, i == 0 ? CELL_BORDER : NODE_BORDER, Color.BLACK);
+            if (i == 0) {
+                g.setFill(ACCENT);
+                g.fillText("top →", PAD + 30, y + 21);
+            }
+        }
+        g.setFill(MUTED);
+        g.fillText("bottom (first page opened)", x, PAD + 22 + items.size() * 38 + 14);
     }
 
-    private static void arrow(Graphics2D g, int x1, int y1, int x2, int y2) {
-        g.setColor(CELL_BORDER);
-        g.setStroke(new BasicStroke(1.6f));
-        g.drawLine(x1, y1, x2, y2);
-        int dir = x2 >= x1 ? -1 : 1;
-        g.fillPolygon(new int[]{x2, x2 + dir * 7, x2 + dir * 7}, new int[]{y2, y2 - 4, y2 + 4}, 3);
+    private void paintQueue(GraphicsContext g, double inner) {
+        if (items.isEmpty()) {
+            caption(g, "The queue is empty. Scan a QR code on the scanner page to add results.", PAD, PAD + 20);
+            return;
+        }
+        double cellW = 200;
+        int perRow = perRow(inner, cellW);
+        caption(g, "poll() removes the oldest at the HEAD; offer() adds the newest at the TAIL (both O(1)).", PAD, PAD + 8);
+        for (int i = 0; i < items.size(); i++) {
+            double x = PAD + (i % perRow) * cellW;
+            double y = PAD + 24 + (i / perRow) * 58;
+            box(g, x, y + 14, cellW - 16, 32, items.get(i), NODE, NODE_BORDER, Color.BLACK);
+            g.setFill(ACCENT);
+            if (i == 0) {
+                g.fillText("HEAD (oldest)", x, y + 10);
+            }
+            if (i == items.size() - 1) {
+                g.fillText("TAIL (newest)", x + (i == 0 ? 100 : 0), y + 10);
+            }
+            if (i % perRow != perRow - 1 && i < items.size() - 1) {
+                arrow(g, x + cellW - 16, y + 30, x + cellW, y + 30);
+            }
+        }
+    }
+
+    private void paintLinked(GraphicsContext g, double inner) {
+        if (items.isEmpty()) {
+            caption(g, "The list is empty.", PAD, PAD + 20);
+            return;
+        }
+        double cellW = 200;
+        int perRow = perRow(inner, cellW);
+        caption(g, "Each node: [prev | value | next]. Nodes are scattered in memory; pointers keep the order.", PAD, PAD + 8);
+        for (int i = 0; i < items.size(); i++) {
+            double x = PAD + (i % perRow) * cellW;
+            double y = PAD + 26 + (i / perRow) * 66;
+            double w = cellW - 24;
+            box(g, x, y + 14, w, 34, items.get(i), NODE, NODE_BORDER, Color.BLACK);
+            g.setStroke(NODE_BORDER);
+            g.strokeLine(x + 16, y + 14, x + 16, y + 48);
+            g.strokeLine(x + w - 16, y + 14, x + w - 16, y + 48);
+            g.setFill(ACCENT);
+            if (i == 0) {
+                g.fillText("head", x, y + 10);
+            }
+            if (i == items.size() - 1) {
+                g.fillText("tail", x + w - 26, y + 10);
+            }
+            if (i % perRow != perRow - 1 && i < items.size() - 1) {
+                arrow(g, x + w, y + 25, x + cellW, y + 25);
+                arrow(g, x + cellW, y + 37, x + w, y + 37);
+            }
+        }
+    }
+
+    private double nodeHeight(BTreeModel.Node node) {
+        return 8 + KEY_LINE * Math.max(1, node.keys().size());
+    }
+
+    private double levelHeight(List<BTreeModel.Node> level) {
+        return level.stream().mapToDouble(this::nodeHeight).max().orElse(30);
+    }
+
+    private double bTreeHeight() {
+        double height = 2 * PAD + 20;
+        for (List<BTreeModel.Node> level : tree.levels()) {
+            height += levelHeight(level) + LEVEL_GAP;
+        }
+        return height;
+    }
+
+    private record Box(double x, double y, double w, double h) {
+    }
+
+    private void paintBTree(GraphicsContext g, double canvasWidth) {
+        List<List<BTreeModel.Node>> levels = tree.levels();
+        List<List<Box>> boxes = new ArrayList<>();
+        double width = Math.max(canvasWidth, requiredWidth());
+        double y = PAD + 20;
+        for (List<BTreeModel.Node> level : levels) {
+            double total = 0;
+            for (BTreeModel.Node node : level) {
+                total += nodeWidth(node) + 14;
+            }
+            double x = Math.max(PAD, (width - total) / 2);
+            List<Box> row = new ArrayList<>();
+            for (BTreeModel.Node node : level) {
+                double w = nodeWidth(node);
+                row.add(new Box(x, y, w, nodeHeight(node)));
+                x += w + 14;
+            }
+            boxes.add(row);
+            y += levelHeight(level) + LEVEL_GAP;
+        }
+
+        g.setStroke(Color.GRAY);
+        for (int li = 0; li < levels.size() - 1; li++) {
+            int child = 0;
+            for (int p = 0; p < levels.get(li).size(); p++) {
+                Box parent = boxes.get(li).get(p);
+                int count = levels.get(li).get(p).childCount();
+                for (int c = 0; c < count && child < boxes.get(li + 1).size(); c++, child++) {
+                    Box target = boxes.get(li + 1).get(child);
+                    double px = parent.x() + (c + 0.5) * parent.w() / count;
+                    g.strokeLine(px, parent.y() + parent.h(), target.x() + target.w() / 2, target.y());
+                }
+            }
+        }
+        for (int li = 0; li < levels.size(); li++) {
+            boolean leaf = li == levels.size() - 1;
+            Color border = leaf ? CELL_BORDER : NODE_BORDER;
+            for (int n = 0; n < levels.get(li).size(); n++) {
+                Box r = boxes.get(li).get(n);
+                List<String> keys = levels.get(li).get(n).keys();
+                box(g, r.x(), r.y(), r.w(), r.h(), "", leaf ? CELL : NODE, border, Color.BLACK);
+                g.setTextBaseline(VPos.CENTER);
+                for (int k = 0; k < keys.size(); k++) {
+                    double top = r.y() + 4 + KEY_LINE * k;
+                    g.setFill(Color.BLACK);
+                    g.fillText(shortKey(keys.get(k)), r.x() + 8, top + KEY_LINE / 2);
+                    if (k > 0) {
+                        g.setStroke(border);
+                        g.strokeLine(r.x() + 4, top, r.x() + r.w() - 4, top);
+                    }
+                }
+                g.setTextBaseline(VPos.BASELINE);
+            }
+        }
+        g.setFill(MUTED);
+        g.fillText("root (interior keys separate the children)", PAD, PAD + 8);
+        g.fillText("leaves: all keys in sorted order", PAD, y - LEVEL_GAP + 18);
+    }
+
+    private double nodeWidth(BTreeModel.Node node) {
+        double widest = node.keys().stream().mapToDouble(k -> textWidth(shortKey(k))).max().orElse(24);
+        return Math.max(40, widest + 16);
+    }
+
+    private static String shortKey(String key) {
+        return key.length() <= 16 ? key : key.substring(0, 15) + "…";
+    }
+
+    private double textWidth(String text) {
+        measure.setText(text);
+        return measure.getLayoutBounds().getWidth();
+    }
+
+    private void box(GraphicsContext g, double x, double y, double w, double h, String text,
+                     Color fill, Color border, Color fg) {
+        g.setFill(fill);
+        g.fillRoundRect(x, y, w, h, 8, 8);
+        g.setStroke(border);
+        g.strokeRoundRect(x, y, w, h, 8, 8);
+        if (text.isEmpty()) {
+            return;
+        }
+        g.setFill(fg);
+        g.setTextAlign(TextAlignment.CENTER);
+        g.setTextBaseline(VPos.CENTER);
+        g.fillText(fit(text, w - 8), x + w / 2, y + h / 2);
+        g.setTextAlign(TextAlignment.LEFT);
+        g.setTextBaseline(VPos.BASELINE);
+    }
+
+    private String fit(String text, double width) {
+        if (textWidth(text) <= width) {
+            return text;
+        }
+        String s = text;
+        while (s.length() > 1 && textWidth(s + "…") > width) {
+            s = s.substring(0, s.length() - 1);
+        }
+        return s + "…";
+    }
+
+    private static void arrow(GraphicsContext g, double x1, double y1, double x2, double y2) {
+        g.setStroke(Color.DARKGRAY);
+        g.strokeLine(x1, y1, x2, y2);
+        double dir = x2 >= x1 ? -1 : 1;
+        g.strokeLine(x2, y2, x2 + dir * 5, y2 - 4);
+        g.strokeLine(x2, y2, x2 + dir * 5, y2 + 4);
+    }
+
+    private static void caption(GraphicsContext g, String text, double x, double y) {
+        g.setFill(MUTED);
+        g.fillText(text, x, y);
     }
 }

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.AccountEditController" styleClass="page" prefWidth="520">
+    <fx:define>
+
+        <TextField fx:id="email" editable="false"/>
+        <TextField fx:id="accountType" editable="false"/>
+        <TextField fx:id="studentNumber" editable="false"/>
+        <TextField fx:id="firstName"/>
+        <TextField fx:id="lastName"/>
+        <TextField fx:id="contact"/>
+        <ComboBox fx:id="course" maxWidth="Infinity"/>
+        <ComboBox fx:id="yearLevel" maxWidth="Infinity"/>
+        <TextField fx:id="purpose"/>
+        <TextField fx:id="personToVisit"/>
+        <TextField fx:id="position"/>
+        <CheckBox fx:id="active" text="Account is active"/>
+    </fx:define>
+
+    <Label fx:id="title" styleClass="page-title"/>
+    <GridPane fx:id="form" styleClass="form">
+        <columnConstraints>
+            <ColumnConstraints minWidth="170"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+    </GridPane>
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Cancel" cancelButton="true" onAction="#cancel"/>
+        <Button text="Save" styleClass="primary" defaultButton="true" onAction="#save"/>
+    </HBox>
+</VBox>

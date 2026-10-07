@@ -1,0 +1,406 @@
+.root {
+    -ugo-primary: #7a1f2b;
+    -ugo-primary-dark: #5c1520;
+    -ugo-primary-light: #f6e7e9;
+    -ugo-accent: #d4a017;
+    -ugo-bg: #f4f1ee;
+    -ugo-surface: #ffffff;
+    -ugo-border: #e2dcd6;
+    -ugo-text: #2b2522;
+    -ugo-muted: #6b625e;
+    -ugo-success: #1e7b34;
+    -ugo-success-bg: #e3f4e7;
+    -ugo-error: #b3261e;
+    -ugo-error-bg: #fbe9e7;
+    -ugo-info-bg: #eef2f8;
+
+    -fx-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    -fx-font-size: 14px;
+    -fx-background-color: -ugo-bg;
+    -fx-text-fill: -ugo-text;
+    -fx-accent: -ugo-primary;
+    -fx-focus-color: -ugo-primary;
+    -fx-faint-focus-color: #7a1f2b22;
+}
+
+.page-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-primary-dark;
+}
+
+.page-subtitle, .muted {
+    -fx-text-fill: -ugo-muted;
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-primary;
+}
+
+.strong {
+    -fx-font-weight: bold;
+}
+
+.balance-amount {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-primary-dark;
+}
+
+.success-text {
+    -fx-text-fill: -ugo-success;
+    -fx-font-weight: bold;
+}
+
+.error-text {
+    -fx-text-fill: -ugo-error;
+}
+
+.page {
+    -fx-padding: 24;
+    -fx-spacing: 14;
+}
+
+.page-scroll, .page-scroll > .viewport {
+    -fx-background-color: -ugo-bg;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.card {
+    -fx-background-color: -ugo-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -ugo-border;
+    -fx-border-radius: 12;
+    -fx-padding: 18;
+    -fx-spacing: 10;
+    -fx-effect: dropshadow(gaussian, rgba(60, 20, 20, 0.08), 12, 0, 0, 3);
+}
+
+.feature-card {
+    -fx-border-color: -ugo-border -ugo-border -ugo-border -ugo-primary;
+    -fx-border-width: 1 1 1 5;
+    -fx-pref-width: 300;
+    -fx-min-width: 240;
+}
+
+.feature-card .card-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-primary-dark;
+}
+
+.toolbar {
+    -fx-hgap: 8;
+    -fx-vgap: 8;
+    -fx-alignment: center-left;
+}
+
+.form {
+    -fx-hgap: 12;
+    -fx-vgap: 10;
+}
+
+.form .label {
+    -fx-text-fill: -ugo-muted;
+}
+
+.text-field, .password-field, .text-area {
+    -fx-background-color: #cfc6bf, white;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+}
+
+.text-field:focused, .password-field:focused, .text-area:focused {
+    -fx-background-color: -ugo-primary, white;
+    -fx-background-insets: 0, 2;
+}
+
+.text-area .content {
+    -fx-background-color: white;
+    -fx-background-radius: 7;
+}
+
+.text-field, .password-field {
+    -fx-padding: 7 10;
+}
+
+.text-field:readonly {
+    -fx-background-color: #cfc6bf, #f1eeeb;
+    -fx-text-fill: -ugo-muted;
+}
+
+.combo-box-base:editable > .text-field, .date-picker > .text-field, .spinner > .text-field {
+    -fx-background-radius: 8 0 0 8, 7 0 0 7;
+}
+
+.combo-box, .date-picker, .spinner {
+    -fx-background-radius: 8;
+}
+
+.button, .toggle-button {
+    -fx-background-radius: 8;
+    -fx-padding: 7 14;
+    -fx-cursor: hand;
+}
+
+.button.primary {
+    -fx-background-color: -ugo-primary;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.button.primary:hover {
+    -fx-background-color: -ugo-primary-dark;
+}
+
+.button.danger {
+    -fx-text-fill: -ugo-error;
+}
+
+.button.link {
+    -fx-background-color: transparent;
+    -fx-text-fill: -ugo-primary;
+    -fx-underline: true;
+    -fx-padding: 2 4;
+}
+
+.app-header {
+    -fx-background-color: linear-gradient(to right, -ugo-primary-dark, -ugo-primary);
+    -fx-padding: 10 16;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+}
+
+.app-header .app-name {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.app-header .app-role {
+    -fx-text-fill: -ugo-accent;
+    -fx-font-weight: bold;
+}
+
+.app-header .header-user {
+    -fx-text-fill: white;
+}
+
+.header-button {
+    -fx-background-color: rgba(255, 255, 255, 0.14);
+    -fx-text-fill: white;
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-border-radius: 8;
+}
+
+.header-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.26);
+}
+
+.header-button:disabled {
+    -fx-opacity: 0.45;
+}
+
+.sidebar {
+    -fx-background-color: -ugo-surface;
+    -fx-border-color: transparent -ugo-border transparent transparent;
+    -fx-padding: 14 10;
+    -fx-spacing: 4;
+    -fx-pref-width: 230;
+    -fx-min-width: 230;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-alignment: center-left;
+    -fx-max-width: infinity;
+    -fx-padding: 10 14;
+    -fx-text-fill: -ugo-text;
+}
+
+.nav-button:hover {
+    -fx-background-color: -ugo-primary-light;
+}
+
+.nav-button:selected {
+    -fx-background-color: -ugo-primary;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.chip:selected {
+    -fx-background-color: -ugo-primary;
+    -fx-text-fill: white;
+}
+
+.brand-panel {
+    -fx-background-color: linear-gradient(to bottom right, -ugo-primary-dark, -ugo-primary);
+    -fx-padding: 40 36;
+    -fx-spacing: 18;
+}
+
+.brand-name {
+    -fx-font-size: 36px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+}
+
+.brand-university {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-accent;
+}
+
+.brand-tagline {
+    -fx-text-fill: #f1dadd;
+}
+
+.login-form {
+    -fx-padding: 40 36;
+    -fx-spacing: 12;
+    -fx-background-color: -ugo-surface;
+}
+
+.splash {
+    -fx-background-color: linear-gradient(to bottom right, -ugo-primary-dark, -ugo-primary);
+}
+
+.splash-title {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-fill: #f5c542;
+}
+
+.splash-status {
+    -fx-font-size: 16px;
+    -fx-fill: #f6e7e9;
+}
+
+.splash-progress {
+    -fx-progress-color: #f5c542;
+}
+
+.table-view, .list-view {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: -ugo-border;
+    -fx-border-radius: 10;
+    -fx-padding: 2;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f7f2ef;
+    -fx-background-radius: 10 10 0 0;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -ugo-border transparent;
+}
+
+.table-view .column-header .label {
+    -fx-font-weight: bold;
+    -fx-text-fill: -ugo-primary-dark;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #fbf9f8;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: -ugo-primary;
+}
+
+.table-row-cell:selected .table-cell {
+    -fx-text-fill: white;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-border-color: -ugo-primary transparent transparent transparent;
+    -fx-border-width: 3 0 0 0;
+}
+
+.qr-frame {
+    -fx-background-color: white;
+    -fx-border-color: -ugo-border;
+    -fx-border-radius: 8;
+    -fx-padding: 8;
+}
+
+.camera-preview {
+    -fx-background-color: #2b2b2b;
+    -fx-background-radius: 10;
+}
+
+.camera-preview .label {
+    -fx-text-fill: #cccccc;
+}
+
+.expiry-ok {
+    -fx-text-fill: -ugo-success;
+    -fx-font-weight: bold;
+}
+
+.expiry-warn {
+    -fx-text-fill: -ugo-error;
+    -fx-font-weight: bold;
+}
+
+.banner {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-width: 2;
+    -fx-padding: 12 16;
+    -fx-spacing: 14;
+    -fx-alignment: center-left;
+}
+
+.banner .banner-icon {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.banner .banner-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.banner-success {
+    -fx-background-color: -ugo-success-bg;
+    -fx-border-color: -ugo-success;
+}
+
+.banner-success .banner-icon, .banner-success .banner-title {
+    -fx-text-fill: -ugo-success;
+}
+
+.banner-error {
+    -fx-background-color: -ugo-error-bg;
+    -fx-border-color: -ugo-error;
+}
+
+.banner-error .banner-icon, .banner-error .banner-title {
+    -fx-text-fill: -ugo-error;
+}
+
+.banner-info {
+    -fx-background-color: -ugo-info-bg;
+    -fx-border-color: -ugo-muted;
+}
+
+.banner-info .banner-icon, .banner-info .banner-title {
+    -fx-text-fill: -ugo-muted;
+}
+
+.code-text {
+    -fx-font-family: "Consolas", "Courier New", monospace;
+    -fx-font-size: 12px;
+}
+
+.diagram-frame {
+    -fx-background-color: white;
+    -fx-border-color: -ugo-border;
+}

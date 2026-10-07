@@ -1,15 +1,29 @@
-# Liceo U Go Automate
+| B-tree | database index |# Liceo U Go Automate
 
-Object-Oriented Automated Campus Management System for **Liceo de Cagayan University**.
-A standalone Java desktop application (Swing) with local SQLite storage, covering campus
-navigation, QR code attendance, and campus entry verification for **Students**, **Guests**,
-and **Administrators**.
+Object-Oriented Automated Campus Management System for **Liceo de Cagayan University** — a standalone
+Java 17+ JavaFX desktop application (FXML views) with a Supabase (PostgreSQL) or local SQLite database.
+
+Features: student and guest registration, secure login, profiles, signed QR code attendance, QR-based
+campus entry verification with guest visit registration, administrator management of accounts,
+locations, attendance, and entry/visit logs, **class programs** (administrators create each term's
+classes and enroll students with automatic schedule-conflict checks; students see their class
+schedule), anonymous **faculty evaluation** (students rate the teachers of their classes once per term
+on five criteria; administrators manage faculty, open/close the period, and see averages and
+comments), **discipline monitoring** (administrators record and resolve cases; students see only their
+own record), **tuition balance** (a per-term ledger of charges, payments, and discounts; tuition can be
+assessed from class program units; students see their own statement of account), and a **Data Structures** page (for the Data Structures subject) showing the structures
+the app uses with their memory allocation and time complexity.
+
+The layout is responsive: it adapts to phone-, tablet-, and desktop-sized windows in portrait or
+landscape. (It is a Java desktop app, so it runs on Windows, macOS, and Linux — not on phones or iPads.)
+
+---
 
 ## Requirements
 
-- Java 17 or newer (JDK to build, JRE to run)
-- Maven 3.8+
-- Optional: a webcam. Without one, QR codes can be read from an image file or typed/pasted.
+- JDK 17 or newer (`java -version`)
+- Maven 3.8+ (`mvn -version`)
+- A webcam is optional. Without one, QR codes can be uploaded as an image file or typed/pasted in.
 
 ## Build and run
 
@@ -18,169 +32,146 @@ mvn clean package
 java -jar target/liceo-u-go-automate.jar
 ```
 
-`mvn clean package` compiles, runs the test suite, and produces a single runnable jar with all
-dependencies. On Java 22+ you may add `--enable-native-access=ALL-UNNAMED` to silence
-native-access warnings (the jar manifest already declares it).
+`mvn clean package` compiles the code, runs the tests, and produces a single runnable jar that contains all dependencies.
 
-On first start, the app creates the database at `~/.liceo-ugo/ugo.db` (on Windows,
-`C:\Users\<you>\.liceo-ugo\ugo.db`), builds the schema, and loads the seed data. To use a
-different file:
+### Running from IntelliJ IDEA
 
-```bash
-java -Dugo.db=/path/to/campus.db -jar target/liceo-u-go-automate.jar
-```
-
-Delete the database file to reset the app to its seed state.
+1. **File → Open…** and select this folder's `pom.xml`, then choose **Open as Project**.
+   IntelliJ imports it as a Maven project and downloads the libraries.
+2. Open `src/main/java/edu/liceo/ugoautomate/App.java` and click the green ▶ next to `main`.
 
 ## Default accounts
 
-| Role          | Username            | Password      |
-|---------------|---------------------|---------------|
-| Administrator | `admin`             | `Admin@123`   |
-| Student       | `2023-00001`        | `Student@123` |
-| Student       | `2023-00002`        | `Student@123` |
-| Student       | `2022-00015`        | `Student@123` |
-| Student       | `2024-00107`        | `Student@123` |
-| Guest         | `guest@example.com` | `Guest@123`   |
+| Role          | Email                         | Password      |
+|---------------|-------------------------------|---------------|
+| Administrator | `admin@liceo.edu.ph`          | `Admin@123`   |
+| Student       | `juan.delacruz@liceo.edu.ph`  | `Student@123` |
+| Student       | `maria.santos@liceo.edu.ph`   | `Student@123` |
+| Student       | `jose.reyes@liceo.edu.ph`     | `Student@123` |
+| Guest         | `guest.ana@example.com`       | `Guest@123`   |
 
-Change the administrator password after first login (My Profile → Change Password).
-Students log in with their student ID and guests with their email address.
+Change the administrator password after the first login (**My Profile → Change password**).
 
-## Features
+## Database: Supabase or local SQLite
 
-| Requirement | Where |
-|---|---|
-| F-1.1 Student registration | Login → *Register as Student* (admins: Accounts → Add Student) |
-| F-1.2 Guest registration (name, contact, purpose, person/office to visit) | Login → *Register as Guest* |
-| F-1.3 Secure login | Login screen routes to the Student, Guest, or Admin dashboard |
-| F-1.4 Profile view/update | *My Profile* (only fields permitted for the role are editable) |
-| F-2.1 Organized campus directory | *Campus Navigator*: buildings, offices, facilities, landmarks by type |
-| F-2.2 Search | *Campus Navigator* search box + type filter |
-| F-2.3 Location details | *Campus Navigator* details card (name, type, building, floor, description) |
-| F-3.1 Generate attendance QR | Admin → *Attendance Sessions* → Show QR Code (save PNG / copy code) |
-| F-3.2 / F-3.3 Scan and record attendance | Student → *Scan Attendance* (camera, image file, or typed code) |
-| F-3.4 View attendance | Admin → *Attendance Records* |
-| F-4.1 Student entry | Student → *Entry Pass* QR, or credentials at the gate |
-| F-4.2 Guest visit registration | Guest → *My Visits* → Register Visit for Today → visit pass |
-| F-4.3 / F-4.4 Verify and log entries | Admin → *Entry Verification* |
-| F-5.1 Manage accounts | Admin → *Accounts* (add, edit, activate/deactivate, reset password, delete) |
-| F-5.2 Manage locations | Admin → *Campus Locations* (add, edit, remove) |
-| Data Structures subject | *Data Structures* page (all roles): where each linear structure is used, memory allocation, Big-O |
-| F-5.3 Manage attendance | Admin → *Attendance Sessions* / *Attendance Records* (manual add, delete) |
-| F-5.4 Entry and visit logs | Admin → *Entry & Visit Logs* |
+If a `supabase.properties` file exists in the project folder (or in `~/.liceo-ugo/`), the app uses that
+Supabase project; otherwise it uses a local SQLite file. Either way the tables and sample accounts are
+created automatically on first run.
 
-### Typical flows
+**Supabase setup:** copy `supabase.properties.example` to `supabase.properties` and fill in the
+Session pooler host, user, and database password (Supabase: **Connect → Direct → Session pooler**).
+`supabase.properties` is git-ignored because it holds the password; never commit it. In the Supabase
+Table Editor, the `student_list` view shows each student with their name and email.
 
-**Attendance.** An admin creates a session under Attendance Sessions and clicks
-*Show QR Code* to project it on screen or save it as a PNG. Students open *Scan Attendance*
-and scan the code. Each scan shows a green SUCCESS or red FAILED banner with the reason and the
-processing time.
+**Local SQLite:** without `supabase.properties`, the database is created at:
 
-**Guest entry.** The guest registers, logs in, opens *My Visits*, and clicks
-*Register Visit for Today* to get a visit pass. At the gate, the admin scans the pass under
-*Entry Verification*. The pass works once, and only on the visit day.
+```
+~/.liceo-ugo/ugo.db          (Windows: C:\Users\<you>\.liceo-ugo\ugo.db)
+```
 
-**Student entry.** The student shows the *Entry Pass* QR, which renews every 10 minutes.
-A student without a device gives their student ID and password at the gate instead.
+Use a different file with `java -Dugo.db=path/to/other.db -jar target/liceo-u-go-automate.jar`.
+Delete the file to start over with fresh seed data.
+
+The seeded buildings and offices are **sample data** for demonstration; administrators can edit them
+on the **Locations** page.
+
+---
+
+## How to try each feature
+
+**QR attendance (F-3)**
+1. Log in as the admin → **Attendance Sessions**. A sample session that is open all day today is seeded.
+   Select it → **Show QR code** (you can **Save as PNG** or **Copy code**).
+2. Log out, log in as a student → **Scan Attendance**. Use the webcam, **Upload QR image…** with the saved
+   PNG, or paste the code. A green banner confirms; scanning again shows a red "Already recorded".
+3. Back as admin → **Attendance Records** shows the student, session, and date/time.
+
+**Student entry (F-4.1, F-4.3, F-4.4)**
+1. As a student → **My Entry QR** → **Generate entry QR** (valid 5 minutes).
+2. As admin → **Entry Gate** → scan/upload/paste it → "Entry granted". See **Entry & Visit Logs**.
+
+**Guest visit (F-4.2)**
+1. On the login screen → **Register as Guest** (or use the sample guest).
+2. As the guest → **My Visits** → register a visit for today → the guest pass QR opens.
+3. As admin → **Entry Gate** → scan the pass → the visit becomes *Checked in* and an entry is logged.
+   A pass works once, and only on its visit date.
+
+---
 
 ## Architecture
 
 ```
 edu.liceo.ugoautomate
-├── App, AppContext      entry point and composition root (wires DAOs → services → UI)
-├── model                encapsulated domain classes: User ← Student / Guest / Administrator,
-│                        CampusLocation, AttendanceSession, AttendanceRecord, GuestVisit, EntryLog …
-├── dao                  DAO interfaces (UserDao, LocationDao, AttendanceSessionDao, …)
-│   └── impl             JDBC/SQLite implementations (AbstractJdbcDao shared plumbing)
-├── service              business rules and authorization (AuthService, AttendanceService,
-│                        EntryService, GuestVisitService, LocationService, AccountService, ProfileService)
-├── security             PasswordHasher (BCrypt), SessionManager, AccessControl,
-│                        QrTokenService (HMAC-signed QR payloads), SecretKeyProvider
-├── util                 Database (HikariCP pool), DatabaseInitializer, QrCodeUtil (ZXing),
-│                        WebcamScanner, Validators, DateTimeUtil, AppConfig
-└── ui                   Swing: LoginFrame, registration dialogs
-    ├── common           DashboardFrame shell, CampusNavigatorPanel, DataStructuresPanel, responsive layouts,
-    │                    QrScanPanel, ResultBanner, DataTable, QrDisplayDialog …
-    ├── student, guest, admin   role dashboards and their pages
+├── App, AppContext          entry point and composition root (wires every layer once)
+├── model                    encapsulated domain classes; User → Student / Guest / Administrator
+├── dao                      DAO interfaces
+│   └── impl                 JDBC implementations (AbstractJdbcDao holds shared plumbing)
+├── service                  business rules, validation, role checks
+├── security                 BCrypt hashing, session, access control, signed QR tokens
+├── util                     database pool/initializer, config, validation, ZXing QR helpers
+├── ds                       Data Structures subject: catalog, memory estimator, B-tree model, benchmark
+└── ui                       JavaFX: login, registration, Navigator (switches login/dashboard)
+    ├── common               dashboard frame, QR scanner, DS page and diagram, shared helpers
+    │                        (Views = FXML loader, Async, Dialogs, Tables, Responsive)
+    ├── student / guest / admin   role dashboards and page controllers
+
+resources/edu/liceo/ugoautomate/ui
+├── *.fxml, common/, student/, guest/, admin/   one FXML view per screen (fx:controller = its controller)
+└── app.css                                     the theme (Liceo maroon and gold)
 ```
 
-The UI talks only to services. Services talk only to DAO interfaces. Every protected
-service method checks the caller's role through `AccessControl`.
+## Data Structures page
 
-Schema and seed data: `src/main/resources/db/schema.sql` and `src/main/resources/db/seed.sql`.
-The seed accounts are created in `DatabaseInitializer`, so their passwords are hashed with BCrypt
-at install time.
+Every dashboard has a **Data Structures** page. Each structure is one the app really uses, drawn with
+live data, with a memory breakdown and a Big-O table:
 
-## Security
+| Structure | Java type | Where the app uses it |
+|---|---|---|
+| Array | `int[]` in ZXing `BitMatrix` | every QR code's module grid |
+| Dynamic array | `ArrayList` | every table (DAO results shown in a `TableView`) |
+| Hash table | `HashMap` | scanner's recent-code check (no double scans) |
+| Stack | `ArrayDeque` | the **Back** button's navigation history |
+| Queue | `ArrayDeque` | "Recent scans" (bounded, oldest removed first) |
+| Doubly linked list | `LinkedHashMap` | dashboard page registry / menu order |
+| B-tree | SQLite index | every `CREATE INDEX` (login by email, logs by date, ...) |
 
-- **Passwords** are hashed with BCrypt (cost 10) and never stored in plain text. When a
-  username doesn't exist, login still checks a dummy hash, so failures take the same time
-  either way. Password fields are wiped from memory after use.
-- **Authorization**: every protected service call re-checks the session role *and* re-reads
-  the account, so a deactivated account loses access immediately. Admin functions require an
-  administrator account. Students and guests can only read their own attendance and visits.
-- **QR codes** are signed, not guessable. The payload looks like
-  `LUGA1|TYPE|subjectId|nonce|expiry|HMAC-SHA256`, and each installation generates its own random
-  key on first start. Before recording anything, the app checks:
-  - the signature (compared in constant time) and the expiry;
-  - the type, so an attendance code can't be used as an entry pass;
-  - the session binding: the nonce must match the session's current one, so *Regenerate QR*
-    kills old codes;
-  - the check-in window, and that the student isn't already recorded;
-  - for visit passes, single use: an atomic `REGISTERED → CHECKED_IN` update.
-- All SQL uses prepared statements.
+Memory figures are estimates for a 64-bit JVM with compressed references (`ds/MemoryEstimator`).
+The **Measure time complexity** tab times real operations at n = 1,000 / 10,000 / 100,000 so O(1),
+O(log n), and O(n) growth is visible.
 
-## Performance
+## Responsive layout
 
-- The HikariCP connection pool is capped at 10 connections. SQLite runs in WAL mode (reads
-  never block writes) with a 5-second busy timeout, and foreign keys are enforced.
-- Every hot-path query uses an index: username, student number, the
-  `(session_id, student_user_id)` unique key, per-student attendance, visit dates, and entry
-  time. List views are capped at 500 rows.
-- Campus locations are cached in memory for 60 seconds, so navigator search never touches the
-  database. Admin edits clear the cache.
-- All database work runs off the Swing event thread. Scan results show their processing time;
-  typical scans finish in tens of milliseconds, well under the 3-second target.
+Resize the window (or maximize/restore) to see it adapt:
 
-## Data Structures (linked to the Data Structures subject)
+- **Wide (desktop, tablet landscape):** sidebar menu; two-column forms and panels.
+- **Narrow (phone, tablet portrait):** the sidebar becomes a **☰ Menu** button, side panels move
+  below the main content, and cards drop to one column.
+- **Short (phone landscape):** pages scroll vertically; wide tables scroll sideways instead of squeezing.
 
-Every dashboard has a **Data Structures** page. For each linear structure the app uses, it shows
-a diagram, where the structure is used in the code, how its memory is allocated, and a Big-O
-table of its operations. There is also a comparison summary.
+Layers depend only downward: **UI → service → DAO → database**. The UI never touches JDBC, and services
+read the acting user from the session instead of trusting the UI.
 
-| Structure | Java type | Used in | Key operations |
-|---|---|---|---|
-| Array | `String[]`, `byte[]` | `RegisterStudentDialog.COURSES`, the 32-byte QR key, `QrTokenService.verify` (6 payload parts) | access O(1) |
-| Dynamic array | `ArrayList` | `AbstractJdbcDao.query` results, `ListTableModel` rows | `get` O(1), `add` amortized O(1) |
-| Linked list | `LinkedList` | `QrScanPanel` recent scans (last 10, newest first) | `addFirst`/`removeLast` O(1) |
-| Stack | `ArrayDeque` (push/pop) | `DashboardFrame` Back-button history | `push`/`pop` O(1) |
-| Queue | `ArrayDeque` (offer/poll) | `QrScanPanel` pending scans that arrive during verification | `offer`/`poll` O(1) |
+Schema and seed scripts: `src/main/resources/db/sqlite/` and `db/postgres/` (`schema.sql`, `seed.sql`).
 
-Memory figures assume a 64-bit JVM with compressed references: a 12-byte object header,
-4-byte references, and 8-byte alignment.
+### Security
 
-## Screen sizes and orientation
+- **Passwords**: BCrypt (work factor 10); never stored or logged in plain text. Failed logins give one
+  generic message and take the same time whether or not the email exists.
+- **Authorization**: every protected service method calls `AccessControl.requireRole(...)`; admin
+  functions reject non-admins even if a screen were reached. Students only see their own attendance;
+  guests only their own visits.
+- **QR tokens**: `UGO1.<TYPE>.<subjectId>.<issued>.<expires>.<nonce>.<HMAC-SHA256>`, signed with a random
+  per-installation secret stored in the database. Before recording anything the app checks the
+  signature (constant-time), expiry, token type, and the bound session/student/visit in the database
+  (session open now, not already recorded, account active, visit pending and dated today).
 
-The app is a Java desktop app, so it runs on Windows, macOS, and Linux computers, including
-Windows tablets such as the Surface. It does not run on Android phones or iPads. The layout
-adapts to any window size or orientation without breaking:
+### Performance
 
-- **Wide screens:** a sidebar menu. Below 780 px wide, the sidebar folds into a **Menu**
-  button. The **Back** button works at every size.
-- **Cards:** home, profile, entry pass, and scan options show side by side when there is room,
-  and stack into one column on narrow or portrait windows.
-- **Pages:** every page scrolls vertically and re-flows to the window width, so nothing is cut
-  off. Button rows and filters wrap onto new lines.
-- **Tables:** wide tables keep readable columns and scroll sideways inside their own box.
-- **Dialogs:** they always fit on the screen and scroll when needed.
-- **Login:** on a narrow screen the brand banner moves above the form.
-- **Touch:** buttons, rows, and scroll bars are larger for touch use.
-
-## Portability and graceful degradation
-
-- The app is plain Java and runs on Windows, macOS, and Linux.
-- If no camera is found, or the webcam native driver fails, the scan dialog says so and
-  points to the other two input methods: image upload and typed code. They always work.
+- HikariCP connection pool (small pool for Supabase); SQLite in WAL mode with a busy timeout so readers
+  never block the writer.
+- Indexes on every hot lookup (email, role, session/student pairs, timestamps, visit dates). Timestamps
+  are fixed-width ISO text so date ranges use index range scans.
+- All database, BCrypt, and QR decoding work runs off the JavaFX application thread (`ui.common.Async`).
 
 ## Tests
 
@@ -188,18 +179,15 @@ adapts to any window size or orientation without breaking:
 mvn test
 ```
 
-- `QrTokenServiceTest` covers signing, tampering, foreign keys, expiry, and malformed input.
-- `CampusFlowTest` runs end to end against a temporary SQLite database: seed data,
-  login/authorization, registration, the attendance flow (duplicate, stale, and expired codes),
-  student entry by pass and by credentials, single-use guest passes, and immediate lockout of a
-  deactivated account.
+- `QrTokenServiceTest`: signing, tampering, foreign keys, expiry, malformed input.
+- `CampusFlowTest`: end-to-end flows on a temporary database — login, registration, attendance
+  (including duplicates and tampering), student entry, guest pass, role enforcement, profile updates,
+  and admin management.
+- `DataStructuresTest`: ArrayList/HashMap growth rules (checked against the real JDK HashMap), bucket
+  hashing, memory totals, B-tree ordering and balance, and catalog completeness.
 
-## Scope notes
+## Out of scope (by design)
 
-The following are deliberately not included: AI chatbot, push notifications, messaging,
-payments, delivery, route guidance or walking directions, attendance analytics dashboards,
-online guest pre-registration (visits can only be registered for the current day), and
-integration with university systems.
-
-The campus buildings and offices in the seed data are an illustrative sample layout.
-Administrators can replace them under **Campus Locations**.
+No AI chatbot, push notifications, messaging, payments, delivery features, route guidance or walking
+directions, attendance analytics dashboards, online guest pre-registration, or integration with
+university systems.

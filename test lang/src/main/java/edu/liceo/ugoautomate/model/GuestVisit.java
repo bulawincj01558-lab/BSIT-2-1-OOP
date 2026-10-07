@@ -3,23 +3,18 @@ package edu.liceo.ugoautomate.model;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-/**
- * A guest's registered visit for a specific day. The {@code passNonce} binds
- * the visit pass QR code to this record so forged or reused passes fail.
- */
 public class GuestVisit {
-
     private long id;
-    private long guestUserId;
+    private long guestId;
     private String guestName;
     private String guestContact;
     private String purpose;
     private String personToVisit;
     private LocalDate visitDate;
-    private VisitStatus status;
-    private String passNonce;
+    private VisitStatus status = VisitStatus.PENDING;
     private LocalDateTime registeredAt;
     private LocalDateTime checkedInAt;
+    private LocalDateTime checkedOutAt;
 
     public long getId() {
         return id;
@@ -29,12 +24,12 @@ public class GuestVisit {
         this.id = id;
     }
 
-    public long getGuestUserId() {
-        return guestUserId;
+    public long getGuestId() {
+        return guestId;
     }
 
-    public void setGuestUserId(long guestUserId) {
-        this.guestUserId = guestUserId;
+    public void setGuestId(long guestId) {
+        this.guestId = guestId;
     }
 
     public String getGuestName() {
@@ -85,14 +80,6 @@ public class GuestVisit {
         this.status = status;
     }
 
-    public String getPassNonce() {
-        return passNonce;
-    }
-
-    public void setPassNonce(String passNonce) {
-        this.passNonce = passNonce;
-    }
-
     public LocalDateTime getRegisteredAt() {
         return registeredAt;
     }
@@ -107,5 +94,13 @@ public class GuestVisit {
 
     public void setCheckedInAt(LocalDateTime checkedInAt) {
         this.checkedInAt = checkedInAt;
+    }
+
+    public LocalDateTime getCheckedOutAt() {
+        return checkedOutAt;
+    }
+
+    public void setCheckedOutAt(LocalDateTime checkedOutAt) {
+        this.checkedOutAt = checkedOutAt;
     }
 }

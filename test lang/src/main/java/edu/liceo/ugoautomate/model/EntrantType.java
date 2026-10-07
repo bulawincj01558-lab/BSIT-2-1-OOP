@@ -1,24 +1,21 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * Who passed through campus entry verification.
- */
 public enum EntrantType {
     STUDENT("Student"),
     GUEST("Guest");
 
-    private final String displayName;
+    private final String label;
 
-    EntrantType(String displayName) {
-        this.displayName = displayName;
+    EntrantType(String label) {
+        this.label = label;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getLabel() {
+        return label;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return label;
     }
 }

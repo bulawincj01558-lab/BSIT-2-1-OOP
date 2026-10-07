@@ -1,17 +1,16 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * A campus visitor. The purpose of visit and person/office to visit captured
- * at registration are used as defaults when the guest registers a visit.
- */
 public class Guest extends User {
-
     private String purposeOfVisit;
     private String personToVisit;
 
+    public Guest() {
+        super(Role.GUEST);
+    }
+
     @Override
-    public Role getRole() {
-        return Role.GUEST;
+    public String getSummary() {
+        return "Visiting " + personToVisit + " - " + purposeOfVisit;
     }
 
     public String getPurposeOfVisit() {

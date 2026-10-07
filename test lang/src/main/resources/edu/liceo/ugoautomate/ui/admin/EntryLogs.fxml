@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.EntryLogsController" styleClass="page">
+    <Label text="Entry &amp; Visit Logs" styleClass="page-title"/>
+    <Label text="Verified campus entries and registered guest visits." styleClass="page-subtitle" wrapText="true"/>
+
+    <HBox spacing="8">
+        <ToggleButton fx:id="entriesTab" text="Entry logs"/>
+        <ToggleButton fx:id="visitsTab" text="Guest visits"/>
+    </HBox>
+
+    <VBox fx:id="entriesPanel" spacing="12" VBox.vgrow="ALWAYS">
+        <FlowPane styleClass="toolbar">
+            <Label text="From:"/>
+            <DatePicker fx:id="fromDate" prefWidth="150"/>
+            <Label text="To:"/>
+            <DatePicker fx:id="toDate" prefWidth="150"/>
+            <Button text="Show" styleClass="primary" onAction="#loadEntries"/>
+            <Label fx:id="entryCount" styleClass="muted"/>
+        </FlowPane>
+        <TableView fx:id="entryTable" minHeight="260" VBox.vgrow="ALWAYS"/>
+    </VBox>
+
+    <VBox fx:id="visitsPanel" spacing="12" VBox.vgrow="ALWAYS">
+        <FlowPane styleClass="toolbar">
+            <CheckBox fx:id="onlyDate" text="Only visits on" selected="true" onAction="#onlyDateChanged"/>
+            <DatePicker fx:id="visitDate" prefWidth="150"/>
+            <Button text="Show" styleClass="primary" onAction="#loadVisits"/>
+            <Button text="Check out" onAction="#checkOut"/>
+            <Button text="Cancel visit" styleClass="danger" onAction="#cancelVisit"/>
+            <Label fx:id="visitCount" styleClass="muted"/>
+        </FlowPane>
+        <TableView fx:id="visitTable" minHeight="260" VBox.vgrow="ALWAYS"/>
+    </VBox>
+</VBox>

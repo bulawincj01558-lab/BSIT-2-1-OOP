@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.ClassRosterController" styleClass="page" prefWidth="760" prefHeight="620">
+    <Label fx:id="heading" styleClass="page-title" wrapText="true"/>
+    <Label fx:id="details" styleClass="page-subtitle" wrapText="true"/>
+
+    <VBox styleClass="card">
+        <Label text="Enroll one student" styleClass="section-title"/>
+        <FlowPane styleClass="toolbar">
+            <TextField fx:id="studentNumber" promptText="Student ID, e.g. 2023-00123" prefColumnCount="18" onAction="#enrollOne"/>
+            <Button text="Enroll" styleClass="primary" onAction="#enrollOne"/>
+        </FlowPane>
+        <Label text="Enroll a whole class group" styleClass="section-title"/>
+        <FlowPane styleClass="toolbar">
+            <ComboBox fx:id="course" editable="true" prefWidth="260" promptText="Course"/>
+            <ComboBox fx:id="yearLevel" prefWidth="110"/>
+            <Button text="Enroll all" onAction="#enrollCourse"/>
+        </FlowPane>
+    </VBox>
+
+    <FlowPane styleClass="toolbar">
+        <Label fx:id="count" styleClass="strong"/>
+        <Button text="Remove from class" styleClass="danger" onAction="#remove"/>
+    </FlowPane>
+    <TableView fx:id="table" minHeight="200" VBox.vgrow="ALWAYS"/>
+
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Close" cancelButton="true" onAction="#close"/>
+    </HBox>
+</VBox>

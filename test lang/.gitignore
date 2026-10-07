@@ -1,32 +1,33 @@
+### Maven ###
+target/
+
 ### IntelliJ IDEA ###
+.idea/
+*.iml
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
-.kotlin
 
 ### Eclipse ###
-.apt_generated
 .classpath
-.factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
+.settings/
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
 
 ### VS Code ###
 .vscode/
 
-### Mac OS ###
+### Local databases ###
+*.db
+*.db-shm
+*.db-wal
+
+### OS ###
 .DS_Store
-### Maven ###
-target/
+Thumbs.db
+
+### Supabase credentials (holds the database password) ###
+supabase.properties
+
+### Personal photos for the butterfly, T-rex, and tank easter eggs (kept out of git; the app skips them when missing) ###
+src/main/resources/edu/liceo/ugoautomate/ui/images/butterfly-face.png
+src/main/resources/edu/liceo/ugoautomate/ui/images/trex-face.png
+src/main/resources/edu/liceo/ugoautomate/ui/images/tank-face.png

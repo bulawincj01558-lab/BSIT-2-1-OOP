@@ -1,65 +1,55 @@
 package edu.liceo.ugoautomate.ui.common;
 
-import java.awt.Component;
-import java.awt.GraphicsConfiguration;
-import java.awt.GraphicsEnvironment;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Window;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import javafx.beans.binding.Bindings;
+import javafx.scene.Node;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.RowConstraints;
 
-/**
- * Breakpoints and helpers that let screens adapt to phone-sized, tablet
- * (portrait/landscape), laptop, and desktop windows.
- */
 public final class Responsive {
-
-    /** Below this window width the sidebar collapses into a Menu button. */
-    public static final int COMPACT_WIDTH = 780;
-
     private Responsive() {
     }
 
-    /** Runs {@code action} now and every time {@code component} is resized. */
-    public static void onResize(Component component, Runnable action) {
-        component.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                action.run();
-            }
+    public static void split(GridPane grid, double breakpoint, double firstShare) {
+        Node first = grid.getChildren().get(0);
+        Node second = grid.getChildren().get(1);
+        ColumnConstraints left = new ColumnConstraints();
+        left.setHgrow(Priority.ALWAYS);
+        left.setMinWidth(0);
+        ColumnConstraints right = new ColumnConstraints();
+        right.setHgrow(Priority.ALWAYS);
+        right.setMinWidth(0);
+        grid.getColumnConstraints().setAll(left, right);
+        RowConstraints top = new RowConstraints();
+        top.setVgrow(Priority.ALWAYS);
+        RowConstraints bottom = new RowConstraints();
+        bottom.setVgrow(Priority.NEVER);
+        grid.getRowConstraints().setAll(top, bottom);
+
+        grid.widthProperty().addListener((obs, old, width) -> {
+            boolean wide = width.doubleValue() >= breakpoint;
+            GridPane.setConstraints(first, 0, 0, wide ? 1 : 2, 1);
+            GridPane.setConstraints(second, wide ? 1 : 0, wide ? 0 : 1, wide ? 1 : 2, 1);
+            left.setPercentWidth(wide ? firstShare * 100 : 100);
+            right.setPercentWidth(wide ? (1 - firstShare) * 100 : 0);
+
+            bottom.setVgrow(wide ? Priority.NEVER : Priority.ALWAYS);
         });
-        action.run();
+        GridPane.setConstraints(first, 0, 0);
+        GridPane.setConstraints(second, 1, 0);
+        left.setPercentWidth(firstShare * 100);
+        right.setPercentWidth((1 - firstShare) * 100);
     }
 
-    /** @return the screen area not covered by the taskbar/dock for the given component's screen */
-    public static Rectangle usableScreen(Component component) {
-        GraphicsConfiguration gc = component == null ? null : component.getGraphicsConfiguration();
-        if (gc == null) {
-            gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
+    public static void fillViewport(ScrollPane scroller) {
+        scroller.setFitToWidth(true);
+        scroller.setFitToHeight(false);
+        if (scroller.getContent() instanceof Region content) {
+            content.minHeightProperty().bind(Bindings.createDoubleBinding(
+                    () -> scroller.getViewportBounds().getHeight(), scroller.viewportBoundsProperty()));
         }
-        Rectangle bounds = gc.getBounds();
-        Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
-        return new Rectangle(bounds.x + insets.left, bounds.y + insets.top,
-                bounds.width - insets.left - insets.right, bounds.height - insets.top - insets.bottom);
-    }
-
-    /**
-     * Packs a window, then shrinks it if needed so it never extends past the
-     * screen (small laptops, tablets, portrait monitors) and centers it.
-     */
-    public static void packToScreen(Window window, Component relativeTo) {
-        window.pack();
-        Rectangle screen = usableScreen(relativeTo != null ? relativeTo : window);
-        window.setSize(Math.min(window.getWidth(), screen.width - 24), Math.min(window.getHeight(), screen.height - 24));
-        window.setLocationRelativeTo(relativeTo);
-    }
-
-    /** Sizes a main window to a comfortable fraction of the screen, capped at {@code maxWidth x maxHeight}. */
-    public static void sizeToScreen(Window window, int maxWidth, int maxHeight) {
-        Rectangle screen = usableScreen(window);
-        window.setSize(Math.min(maxWidth, (int) (screen.width * 0.94)), Math.min(maxHeight, (int) (screen.height * 0.94)));
-        window.setLocationRelativeTo(null);
     }
 }

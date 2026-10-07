@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.ResultBanner?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.common.QrScanController" styleClass="page">
+    <Label fx:id="heading" styleClass="page-title"/>
+    <Label fx:id="help" styleClass="page-subtitle" wrapText="true"/>
+
+    <ResultBanner fx:id="banner"/>
+
+    <GridPane fx:id="body" hgap="16" vgap="16">
+        <VBox styleClass="card">
+            <Label text="1. Scan with webcam" styleClass="section-title"/>
+            <StackPane fx:id="previewPane" styleClass="camera-preview"
+                       minWidth="0" prefWidth="320" minHeight="240" prefHeight="300">
+                <ImageView fx:id="preview" preserveRatio="true"/>
+                <Label fx:id="previewText" text="Camera is off"/>
+            </StackPane>
+            <FlowPane styleClass="toolbar">
+                <Button fx:id="startCamera" text="Start camera" styleClass="primary" onAction="#startCamera"/>
+                <Button fx:id="stopCamera" text="Stop camera" disable="true" onAction="#stopCamera"/>
+            </FlowPane>
+            <Label fx:id="cameraStatus" styleClass="muted" wrapText="true"/>
+        </VBox>
+
+        <VBox spacing="16">
+            <VBox styleClass="card">
+                <Label text="2. Upload an image of the QR code" styleClass="section-title"/>
+                <Button text="Upload QR image..." onAction="#chooseImage"/>
+            </VBox>
+            <VBox styleClass="card">
+                <Label text="3. Type or paste the code" styleClass="section-title"/>
+                <TextField fx:id="manualCode" promptText="UGO1...." onAction="#submitManual"/>
+                <Button text="Submit code" onAction="#submitManual"/>
+            </VBox>
+            <VBox styleClass="card" VBox.vgrow="ALWAYS">
+                <Label text="Recent scans (newest first)" styleClass="section-title"/>
+                <ListView fx:id="historyList" prefHeight="170" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </VBox>
+    </GridPane>
+</VBox>

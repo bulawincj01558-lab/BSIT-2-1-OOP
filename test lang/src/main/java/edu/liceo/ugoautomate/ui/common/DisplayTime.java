@@ -1,36 +1,32 @@
 package edu.liceo.ugoautomate.ui.common;
 
-import edu.liceo.ugoautomate.util.DateTimeUtil;
-
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
-/**
- * Table cell value that displays a friendly date/time but sorts chronologically.
- */
-public record DisplayTime(LocalDateTime time, boolean dateOnly) implements Comparable<DisplayTime> {
+public final class DisplayTime {
+    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("MMM d, yyyy h:mm a");
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("MMM d, yyyy");
+    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("h:mm:ss a");
 
-    private static final Comparator<LocalDateTime> ORDER = Comparator.nullsFirst(Comparator.naturalOrder());
-
-    public static DisplayTime of(LocalDateTime time) {
-        return new DisplayTime(time, false);
+    private DisplayTime() {
     }
 
-    public static DisplayTime of(LocalDate date) {
-        return new DisplayTime(date == null ? null : date.atStartOfDay(), true);
+    public static String format(LocalDateTime value) {
+        return value == null ? "" : DATE_TIME.format(value);
     }
 
-    @Override
-    public int compareTo(DisplayTime other) {
-        return ORDER.compare(time, other.time);
+    public static String formatTime(LocalDateTime value) {
+        return value == null ? "" : TIME.format(value);
     }
 
-    @Override
-    public String toString() {
-        if (time == null) {
-            return "";
-        }
-        return dateOnly ? DateTimeUtil.format(time.toLocalDate()) : DateTimeUtil.format(time);
+    public static String format(LocalDate value) {
+        return value == null ? "" : DATE.format(value);
+    }
+
+    public static String format(Instant value) {
+        return value == null ? "" : DATE_TIME.format(LocalDateTime.ofInstant(value, ZoneId.systemDefault()));
     }
 }

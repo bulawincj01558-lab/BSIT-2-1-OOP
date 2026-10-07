@@ -2,50 +2,59 @@ package edu.liceo.ugoautomate.ui.student;
 
 import edu.liceo.ugoautomate.AppContext;
 import edu.liceo.ugoautomate.model.User;
-import edu.liceo.ugoautomate.ui.common.CampusNavigatorPanel;
-import edu.liceo.ugoautomate.ui.common.DashboardFrame;
-import edu.liceo.ugoautomate.ui.common.DataStructuresPanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel;
-import edu.liceo.ugoautomate.ui.common.HomePanel.Shortcut;
-import edu.liceo.ugoautomate.ui.common.ProfilePanel;
-import edu.liceo.ugoautomate.ui.common.QrScanPanel;
-import edu.liceo.ugoautomate.ui.common.UiTheme;
+import edu.liceo.ugoautomate.ui.common.DashboardController;
+import edu.liceo.ugoautomate.ui.common.DataStructuresController;
+import edu.liceo.ugoautomate.ui.common.HomeController;
+import edu.liceo.ugoautomate.ui.common.HomeController.Shortcut;
+import edu.liceo.ugoautomate.ui.common.ProfileController;
+import edu.liceo.ugoautomate.ui.common.QrScanController;
+import edu.liceo.ugoautomate.ui.common.Views;
+import edu.liceo.ugoautomate.ui.common.Views.View;
 
-/**
- * Student dashboard: navigator, attendance scanning and history, campus
- * entry pass, and profile.
- */
-public class StudentDashboard extends DashboardFrame {
+public final class StudentDashboard {
+    private static final String HOME = "Home";
+    private static final String SCAN = "Scan Attendance";
+    private static final String HISTORY = "My Attendance";
+    private static final String ENTRY = "My Entry QR";
+    private static final String PROGRAM = "My Class Program";
+    private static final String EVALUATION = "Faculty Evaluation";
+    private static final String DISCIPLINE = "My Discipline Record";
+    private static final String TUITION = "My Tuition";
+    private static final String DATA_STRUCTURES = "Data Structures";
+    private static final String PROFILE = "My Profile";
 
-    static final String HOME = "Home";
-    static final String NAVIGATOR = "Campus Navigator";
-    static final String SCAN = "Scan Attendance";
-    static final String HISTORY = "My Attendance";
-    static final String ENTRY_PASS = "Entry Pass";
-    static final String PROFILE = "My Profile";
-    static final String DATA_STRUCTURES = "Data Structures";
+    private StudentDashboard() {
+    }
 
-    public StudentDashboard(AppContext ctx) {
-        super(ctx, "Student");
-        String firstName = ctx.session().currentUser().map(User::getFullName).orElse("").split(" ")[0];
+    public static View<DashboardController> create(AppContext ctx, User student) {
+        View<DashboardController> view = Views.load(ctx, "common/Dashboard.fxml");
+        DashboardController d = view.controller();
+        d.setRole("Student");
 
-        addPage(HOME, new HomePanel("Welcome, " + firstName + "!",
-                "What would you like to do today?", this::showPage,
-                new Shortcut(SCAN, "Scan the QR code shown by your instructor or event organizer to record your attendance."),
-                new Shortcut(ENTRY_PASS, "Show your personal QR entry pass at the campus gate."),
-                new Shortcut(NAVIGATOR, "Search the campus directory of buildings, offices, and facilities."),
-                new Shortcut(HISTORY, "Review the classes and events where your attendance was recorded."),
-                new Shortcut(PROFILE, "View your account and update your contact details or password."),
-                new Shortcut(DATA_STRUCTURES, "See the arrays, lists, stacks, and queues used in this app, with memory use and Big-O time complexity.")));
-        addPage(NAVIGATOR, new CampusNavigatorPanel(ctx));
-        addPage(SCAN, UiTheme.page(SCAN,
-                "Scan the authorized QR code for your class or event. Your student ID, date, and time are recorded.",
-                new QrScanPanel("Scan, upload, or type the attendance code to record your attendance.",
-                        ctx.attendance()::recordAttendance)));
-        addPage(HISTORY, new MyAttendancePanel(ctx));
-        addPage(ENTRY_PASS, new EntryPassPanel(ctx));
-        addPage(PROFILE, new ProfilePanel(ctx));
-        addPage(DATA_STRUCTURES, new DataStructuresPanel());
-        showPage(HOME);
+        d.addPage(HOME, HomeController.create(ctx, "Welcome, " + student.getFirstName() + "!", student.getSummary(), d::showPage,
+                new Shortcut(SCAN, "Scan your class or event QR code to record attendance."),
+                new Shortcut(ENTRY, "Show your entry QR code at the campus gate."),
+                new Shortcut(PROGRAM, "See your classes this term: schedule, room, and instructor."),
+                new Shortcut(HISTORY, "See the classes and events you have attended."),
+                new Shortcut(EVALUATION, "Rate your teachers for this term. Your answers are anonymous."),
+                new Shortcut(DISCIPLINE, "See any disciplinary cases on your record and their status."),
+                new Shortcut(TUITION, "See your tuition balance, payments, and discounts this term."),
+                new Shortcut(DATA_STRUCTURES, "See the data structures behind the app, with memory allocation and time complexity."),
+                new Shortcut(PROFILE, "View and update your profile or change your password.")));
+        d.addPage(SCAN, QrScanController.create(ctx, "Scan Attendance",
+                "Scan the attendance QR code shown by your instructor or event organizer.", d.scanHistory(),
+                (code, method) -> ctx.attendance().recordAttendance(code, method)));
+        d.addPage(PROGRAM, Views.load(ctx, "student/ClassProgram.fxml"));
+        d.addPage(HISTORY, Views.load(ctx, "student/MyAttendance.fxml"));
+        d.addPage(ENTRY, Views.load(ctx, "student/EntryQr.fxml"));
+        d.addPage(EVALUATION, Views.load(ctx, "student/FacultyEvaluation.fxml"));
+        d.addPage(DISCIPLINE, Views.load(ctx, "student/MyDiscipline.fxml"));
+        d.addPage(TUITION, Views.load(ctx, "student/MyTuition.fxml"));
+        d.addPage(DATA_STRUCTURES, DataStructuresController.create(ctx, d));
+        View<ProfileController> profile = Views.load(ctx, "common/Profile.fxml");
+        profile.controller().setOnSaved(d::refreshHeader);
+        d.addPage(PROFILE, profile);
+        d.showFirstPage();
+        return view;
     }
 }

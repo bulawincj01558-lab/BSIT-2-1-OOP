@@ -1,22 +1,22 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * A staff account with access to management and entry verification features.
- */
 public class Administrator extends User {
+    private String position;
 
-    private String office;
+    public Administrator() {
+        super(Role.ADMIN);
+    }
 
     @Override
-    public Role getRole() {
-        return Role.ADMIN;
+    public String getSummary() {
+        return position == null || position.isBlank() ? "Administrator" : position;
     }
 
-    public String getOffice() {
-        return office;
+    public String getPosition() {
+        return position;
     }
 
-    public void setOffice(String office) {
-        this.office = office;
+    public void setPosition(String position) {
+        this.position = position;
     }
 }

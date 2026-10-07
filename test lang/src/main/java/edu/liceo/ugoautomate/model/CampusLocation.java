@@ -1,17 +1,24 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * A building, office, facility, or landmark on campus, shown in the Campus
- * Navigator list with its details.
- */
 public class CampusLocation {
-
     private long id;
     private String name;
     private LocationType type;
     private String building;
     private String floor;
     private String description;
+
+    public String getPlacement() {
+        boolean hasBuilding = building != null && !building.isBlank();
+        boolean hasFloor = floor != null && !floor.isBlank();
+        if (hasBuilding && hasFloor) {
+            return building + ", " + floor;
+        }
+        if (hasBuilding) {
+            return building;
+        }
+        return hasFloor ? floor : "-";
+    }
 
     public long getId() {
         return id;
@@ -59,23 +66,6 @@ public class CampusLocation {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    /** Persisted locations are equal when their ids match; unsaved ones only by identity. */
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof CampusLocation other)) {
-            return false;
-        }
-        return id != 0 && id == other.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return id != 0 ? Long.hashCode(id) : System.identityHashCode(this);
     }
 
     @Override

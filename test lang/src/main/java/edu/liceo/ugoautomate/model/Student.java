@@ -1,22 +1,26 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * A registered Liceo student. Students log in with their student number.
- */
 public class Student extends User {
-
     private String studentNumber;
     private String course;
     private int yearLevel;
 
-    @Override
-    public Role getRole() {
-        return Role.STUDENT;
+    public Student() {
+        super(Role.STUDENT);
     }
 
     @Override
-    public String getDisplayIdentifier() {
-        return studentNumber;
+    public String getSummary() {
+        return studentNumber + " - " + course + " " + yearLevel + getYearSuffix(yearLevel) + " Year";
+    }
+
+    private static String getYearSuffix(int year) {
+        return switch (year) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 
     public String getStudentNumber() {
@@ -41,10 +45,5 @@ public class Student extends User {
 
     public void setYearLevel(int yearLevel) {
         this.yearLevel = yearLevel;
-    }
-
-    /** @return e.g. "BSIT 2" */
-    public String getCourseAndYear() {
-        return course + " " + yearLevel;
     }
 }

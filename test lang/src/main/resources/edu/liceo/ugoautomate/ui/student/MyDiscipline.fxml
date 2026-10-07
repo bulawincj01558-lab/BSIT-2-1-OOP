@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.student.MyDisciplineController" styleClass="page">
+    <Label text="My Discipline Record" styleClass="page-title"/>
+    <Label text="Cases recorded by the Office of Student Affairs. Visit the office if you have questions about a case."
+           styleClass="page-subtitle" wrapText="true"/>
+
+    <VBox styleClass="card">
+        <Label fx:id="summary" styleClass="section-title" wrapText="true"/>
+    </VBox>
+
+    <FlowPane styleClass="toolbar">
+        <Button text="Refresh" onAction="#reload"/>
+    </FlowPane>
+    <TableView fx:id="table" minHeight="200" VBox.vgrow="ALWAYS"/>
+
+    <VBox styleClass="card">
+        <Label fx:id="detailTitle" text="Select a case to see its details." styleClass="section-title" wrapText="true"/>
+        <Label fx:id="detailText" wrapText="true"/>
+    </VBox>
+</VBox>

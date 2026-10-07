@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.EvaluationResultsController" styleClass="page">
+    <Label text="Evaluation Results" styleClass="page-title"/>
+    <Label text="Anonymous results: averages from 1 (poor) to 5 (excellent), and students' comments without their names."
+           styleClass="page-subtitle" wrapText="true"/>
+
+    <VBox styleClass="card">
+        <Label text="Current term and evaluation period" styleClass="section-title"/>
+        <FlowPane styleClass="toolbar">
+            <Label text="Term:"/>
+            <TextField fx:id="periodTerm" prefColumnCount="22" promptText="SY 2026-2027 1st Semester"/>
+            <CheckBox fx:id="periodOpen" text="Open for students"/>
+            <Button text="Save period" styleClass="primary" onAction="#savePeriod"/>
+        </FlowPane>
+        <Label text="The current term is also used by Class Programs. Students always evaluate the current term; changing it starts a new round of evaluations, and past results stay available below."
+               styleClass="muted" wrapText="true"/>
+    </VBox>
+
+    <FlowPane styleClass="toolbar">
+        <Label text="Show results for:"/>
+        <ComboBox fx:id="termFilter" prefWidth="280" onAction="#loadSummaries"/>
+        <Button text="Refresh" onAction="#refresh"/>
+    </FlowPane>
+    <TableView fx:id="summaryTable" minHeight="240" VBox.vgrow="ALWAYS"/>
+
+    <Label fx:id="commentsTitle" text="Select a faculty member to see their comments." styleClass="section-title" wrapText="true"/>
+    <TableView fx:id="commentTable" minHeight="200"/>
+</VBox>

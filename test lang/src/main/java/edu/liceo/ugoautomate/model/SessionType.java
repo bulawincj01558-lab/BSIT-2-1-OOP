@@ -1,24 +1,21 @@
 package edu.liceo.ugoautomate.model;
 
-/**
- * Kind of activity an attendance session is created for.
- */
 public enum SessionType {
-    CLASS("Class Session"),
+    CLASS("Class"),
     EVENT("Event");
 
-    private final String displayName;
+    private final String label;
 
-    SessionType(String displayName) {
-        this.displayName = displayName;
+    SessionType(String label) {
+        this.label = label;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getLabel() {
+        return label;
     }
 
     @Override
     public String toString() {
-        return displayName;
+        return label;
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.QrView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.common.QrDialogController"
+      styleClass="page" prefWidth="460">
+    <QrView fx:id="qrView"/>
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Close" styleClass="primary" defaultButton="true" cancelButton="true" onAction="#close"/>
+    </HBox>
+</VBox>

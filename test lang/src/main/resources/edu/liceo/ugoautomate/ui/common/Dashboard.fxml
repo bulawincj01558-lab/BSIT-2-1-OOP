@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.SpinningLogo?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:id="root" fx:controller="edu.liceo.ugoautomate.ui.common.DashboardController">
+    <top>
+        <HBox styleClass="app-header">
+            <Button fx:id="menuButton" text="☰ Menu" styleClass="header-button" onAction="#showMenu"/>
+            <SpinningLogo size="42" fire="true"/>
+            <VBox HBox.hgrow="ALWAYS" minWidth="0">
+                <Label fx:id="appName" styleClass="app-name"/>
+                <Label fx:id="roleLabel" styleClass="app-role"/>
+            </VBox>
+            <Label fx:id="userLabel" styleClass="header-user" minWidth="0"/>
+            <Button fx:id="backButton" text="← Back" styleClass="header-button" onAction="#goBack"/>
+            <Button text="Logout" styleClass="header-button" onAction="#logout"/>
+        </HBox>
+    </top>
+    <left>
+        <VBox fx:id="sidebar" styleClass="sidebar"/>
+    </left>
+    <center>
+        <StackPane fx:id="content"/>
+    </center>
+</BorderPane>

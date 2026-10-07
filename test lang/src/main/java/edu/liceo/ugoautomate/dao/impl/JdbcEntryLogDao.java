@@ -4,73 +4,55 @@ import edu.liceo.ugoautomate.dao.EntryLogDao;
 import edu.liceo.ugoautomate.model.EntrantType;
 import edu.liceo.ugoautomate.model.EntryLog;
 import edu.liceo.ugoautomate.model.VerificationMethod;
-import edu.liceo.ugoautomate.util.DateTimeUtil;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
-/**
- * SQLite implementation of {@link EntryLogDao}. Date-range queries use the
- * entry_time index.
- */
 public class JdbcEntryLogDao extends AbstractJdbcDao implements EntryLogDao {
-
     public JdbcEntryLogDao(DataSource dataSource) {
         super(dataSource);
     }
 
     @Override
-    public long insert(EntryLog log) {
+    public long create(EntryLog e) {
         long id = insert("""
-                INSERT INTO entry_logs
-                    (entrant_type, user_id, visit_id, entrant_name, identifier, details,
-                     verification_method, verified_by, entry_time)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, ps -> {
-            ps.setString(1, log.getEntrantType().name());
-            setNullableLong(ps, 2, log.getUserId());
-            setNullableLong(ps, 3, log.getVisitId());
-            ps.setString(4, log.getEntrantName());
-            ps.setString(5, log.getIdentifier());
-            ps.setString(6, log.getDetails());
-            ps.setString(7, log.getMethod().name());
-            setNullableLong(ps, 8, log.getVerifiedBy());
-            ps.setString(9, DateTimeUtil.toDb(log.getEntryTime()));
-        });
-        log.setId(id);
+                INSERT INTO entry_logs (entrant_type, user_id, visit_id, entrant_name, details, method, verified_by, logged_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                e.getEntrantType(), e.getUserId(), e.getVisitId(), e.getEntrantName(), e.getDetails(),
+                e.getMethod(), e.getVerifiedBy(), e.getLoggedAt());
+        e.setId(id);
         return id;
     }
 
     @Override
-    public List<EntryLog> findBetween(LocalDateTime from, LocalDateTime to) {
-        return query("""
-                SELECT e.*, vb.full_name AS verified_by_name
+    public List<EntryLog> findBetween(LocalDate from, LocalDate to) {
+        return queryList("""
+                SELECT e.id, e.entrant_type, e.user_id, e.visit_id, e.entrant_name, e.details, e.method,
+                       e.verified_by, e.logged_at, a.first_name || ' ' || a.last_name AS verified_by_name
                 FROM entry_logs e
-                LEFT JOIN users vb ON vb.id = e.verified_by
-                WHERE e.entry_time BETWEEN ? AND ?
-                ORDER BY e.entry_time DESC
-                """, ps -> {
-            ps.setString(1, DateTimeUtil.toDb(from));
-            ps.setString(2, DateTimeUtil.toDb(to));
-        }, JdbcEntryLogDao::map);
+                LEFT JOIN users a ON a.id = e.verified_by
+                WHERE e.logged_at >= ? AND e.logged_at < ?
+                ORDER BY e.logged_at DESC
+                """,
+                JdbcEntryLogDao::map, from.atStartOfDay(), to.plusDays(1).atStartOfDay());
     }
 
     private static EntryLog map(ResultSet rs) throws SQLException {
-        EntryLog log = new EntryLog();
-        log.setId(rs.getLong("id"));
-        log.setEntrantType(EntrantType.valueOf(rs.getString("entrant_type")));
-        log.setUserId(getNullableLong(rs, "user_id"));
-        log.setVisitId(getNullableLong(rs, "visit_id"));
-        log.setEntrantName(rs.getString("entrant_name"));
-        log.setIdentifier(rs.getString("identifier"));
-        log.setDetails(rs.getString("details"));
-        log.setMethod(VerificationMethod.valueOf(rs.getString("verification_method")));
-        log.setVerifiedBy(getNullableLong(rs, "verified_by"));
-        log.setVerifiedByName(rs.getString("verified_by_name"));
-        log.setEntryTime(getDateTime(rs, "entry_time"));
-        return log;
+        EntryLog e = new EntryLog();
+        e.setId(rs.getLong("id"));
+        e.setEntrantType(EntrantType.valueOf(rs.getString("entrant_type")));
+        e.setUserId(getNullableLong(rs, "user_id"));
+        e.setVisitId(getNullableLong(rs, "visit_id"));
+        e.setEntrantName(rs.getString("entrant_name"));
+        e.setDetails(rs.getString("details"));
+        e.setMethod(VerificationMethod.valueOf(rs.getString("method")));
+        e.setVerifiedBy(getNullableLong(rs, "verified_by"));
+        e.setVerifiedByName(rs.getString("verified_by_name"));
+        e.setLoggedAt(getDateTime(rs, "logged_at"));
+        return e;
     }
 }

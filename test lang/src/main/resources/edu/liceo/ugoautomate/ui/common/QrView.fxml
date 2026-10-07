@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.StackPane?>
+
+<fx:root type="javafx.scene.layout.VBox" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+         spacing="10" alignment="TOP_CENTER">
+    <Label fx:id="caption" styleClass="section-title" wrapText="true"/>
+    <StackPane styleClass="qr-frame" maxWidth="-Infinity" maxHeight="-Infinity" minWidth="316" minHeight="316">
+        <ImageView fx:id="image" fitWidth="300" fitHeight="300" preserveRatio="true"/>
+        <Label fx:id="placeholder" styleClass="muted"/>
+    </StackPane>
+    <Label fx:id="expiry"/>
+    <Label text="Code text (for manual entry if the camera cannot read the image):" styleClass="muted" wrapText="true"/>
+    <TextArea fx:id="codeText" editable="false" wrapText="true" prefRowCount="3" styleClass="code-text"/>
+    <FlowPane styleClass="toolbar" alignment="CENTER">
+        <Button fx:id="saveButton" text="Save as PNG..." onAction="#save"/>
+        <Button fx:id="copyButton" text="Copy code" onAction="#copy"/>
+    </FlowPane>
+</fx:root>

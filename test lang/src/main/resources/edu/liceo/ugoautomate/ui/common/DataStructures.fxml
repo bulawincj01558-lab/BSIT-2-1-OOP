@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.DsDiagram?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.common.DataStructuresController" styleClass="page">
+    <Label text="Data Structures" styleClass="page-title"/>
+    <Label styleClass="page-subtitle" wrapText="true"
+           text="How Liceo U Go Automate stores its data: the real structures behind each feature, their memory allocation, and their time complexity (Big-O)."/>
+
+    <HBox spacing="8">
+        <ToggleButton fx:id="structuresTab" text="Structures in this app"/>
+        <ToggleButton fx:id="benchmarkTab" text="Measure time complexity"/>
+    </HBox>
+
+    <VBox fx:id="structuresPanel" spacing="12">
+        <FlowPane fx:id="chips" styleClass="toolbar"/>
+        <VBox styleClass="card">
+            <Label fx:id="title" styleClass="page-title"/>
+            <Label fx:id="javaType" styleClass="strong" wrapText="true"/>
+
+            <Label text="Used in this app" styleClass="section-title"/>
+            <Label fx:id="usedIn" wrapText="true"/>
+            <Label fx:id="liveLabel" styleClass="success-text" wrapText="true"/>
+            <ScrollPane fx:id="diagramScroll" fitToWidth="true" vbarPolicy="NEVER" styleClass="diagram-frame">
+                <DsDiagram fx:id="diagram"/>
+            </ScrollPane>
+
+            <Label text="Memory allocation" styleClass="section-title"/>
+            <Label fx:id="allocation" wrapText="true"/>
+            <TableView fx:id="memoryTable"/>
+            <Label fx:id="memoryTotal" styleClass="strong"/>
+            <Label fx:id="memoryNote" wrapText="true" styleClass="muted"/>
+
+            <Label text="Time complexity" styleClass="section-title"/>
+            <TableView fx:id="complexityTable"/>
+            <Label fx:id="spaceLabel" styleClass="strong"/>
+            <Label wrapText="true" styleClass="muted"
+                   text="n = number of elements, k = number of results. * HashMap buckets with more than 8 colliding keys become red-black trees, so the worst case is O(log n) instead of O(n). Memory figures are estimates for a 64-bit JVM with compressed references."/>
+        </VBox>
+    </VBox>
+
+    <VBox fx:id="benchmarkPanel" spacing="12" VBox.vgrow="ALWAYS">
+        <Label wrapText="true" styleClass="page-subtitle"
+               text="Runs each operation on this computer with 1,000, 10,000, and 100,000 elements and shows the average time per operation. Watch the Growth column: O(1) stays about ×1, O(log n) grows slightly, and O(n) grows about ×100 when n grows ×100. Exact times differ per computer."/>
+        <FlowPane styleClass="toolbar">
+            <Button fx:id="runBenchmark" text="Run measurement" styleClass="primary" onAction="#runBenchmark"/>
+            <Label fx:id="benchmarkStatus" text="Not measured yet." styleClass="muted"/>
+        </FlowPane>
+        <TableView fx:id="benchmarkTable" minHeight="260" VBox.vgrow="ALWAYS"/>
+    </VBox>
+</VBox>
