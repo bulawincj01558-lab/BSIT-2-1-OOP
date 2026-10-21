@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="edu.liceo.ugoautomate.ui.common.QrScanController" styleClass="page">
+      fx:controller="edu.liceo.ugoautomate.ui.common.QrScanController" fx:id="page" styleClass="page">
     <Label fx:id="heading" styleClass="page-title"/>
     <Label fx:id="help" styleClass="page-subtitle" wrapText="true"/>
 

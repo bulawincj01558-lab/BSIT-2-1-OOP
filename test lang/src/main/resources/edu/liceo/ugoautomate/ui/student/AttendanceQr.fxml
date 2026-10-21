@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import edu.liceo.ugoautomate.ui.common.QrView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.student.AttendanceQrController" styleClass="card" maxWidth="560">
+    <Label text="My attendance QR" styleClass="section-title"/>
+    <Label fx:id="help" styleClass="muted" wrapText="true"/>
+    <QrView fx:id="qrView"/>
+    <Button text="Get a new code" onAction="#generate"/>
+</VBox>

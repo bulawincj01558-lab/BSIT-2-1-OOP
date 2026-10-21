@@ -5,6 +5,8 @@ public enum QrTokenType {
 
     STUDENT_ENTRY("a student entry QR code"),
 
+    STUDENT_ATTENDANCE("a student attendance QR code"),
+
     GUEST_PASS("a guest pass");
 
     private final String description;

@@ -16,7 +16,6 @@
         <Button text="New session" styleClass="primary" onAction="#create"/>
         <Button text="Edit..." onAction="#edit"/>
         <Button text="Show QR code" onAction="#showQr"/>
-        <Button text="View attendance" onAction="#viewRecords"/>
         <Button text="Delete" styleClass="danger" onAction="#delete"/>
         <Button text="Refresh" onAction="#reload"/>
     </FlowPane>

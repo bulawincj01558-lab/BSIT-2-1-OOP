@@ -34,8 +34,8 @@
 
     <VBox fx:id="visitsPanel" spacing="12" VBox.vgrow="ALWAYS">
         <FlowPane styleClass="toolbar">
-            <CheckBox fx:id="onlyDate" text="Only visits on" selected="true" onAction="#onlyDateChanged"/>
-            <DatePicker fx:id="visitDate" prefWidth="150"/>
+            <CheckBox fx:id="onlyDate" text="Only visits on" onAction="#onlyDateChanged"/>
+            <DatePicker fx:id="visitDate" prefWidth="150" disable="true" onAction="#loadVisits"/>
             <Button text="Show" styleClass="primary" onAction="#loadVisits"/>
             <Button text="Check out" onAction="#checkOut"/>
             <Button text="Cancel visit" styleClass="danger" onAction="#cancelVisit"/>

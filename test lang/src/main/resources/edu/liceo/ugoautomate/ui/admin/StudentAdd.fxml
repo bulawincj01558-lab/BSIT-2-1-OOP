@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="edu.liceo.ugoautomate.ui.admin.StudentAddController" styleClass="page" prefWidth="520">
+    <fx:define>
+        <TextField fx:id="studentNumber" promptText="2026-00001"/>
+        <TextField fx:id="firstName"/>
+        <TextField fx:id="lastName"/>
+        <ComboBox fx:id="course" maxWidth="Infinity"/>
+        <ComboBox fx:id="yearLevel" maxWidth="Infinity"/>
+        <TextField fx:id="email" promptText="name@liceo.edu.ph"/>
+        <TextField fx:id="contact"/>
+        <PasswordField fx:id="password"/>
+        <PasswordField fx:id="confirmPassword"/>
+    </fx:define>
+
+    <Label text="Add Student" styleClass="page-title"/>
+    <Label text="The student can log in with this email and password, then change the password in My Profile."
+           styleClass="page-subtitle" wrapText="true"/>
+    <GridPane fx:id="form" styleClass="form">
+        <columnConstraints>
+            <ColumnConstraints minWidth="170"/>
+            <ColumnConstraints hgrow="ALWAYS"/>
+        </columnConstraints>
+    </GridPane>
+    <Label text="Password: at least 8 characters with a letter and a number." styleClass="muted" wrapText="true"/>
+    <HBox spacing="8" alignment="CENTER_RIGHT">
+        <Button text="Cancel" cancelButton="true" onAction="#cancel"/>
+        <Button text="Add student" styleClass="primary" defaultButton="true" onAction="#save"/>
+    </HBox>
+</VBox>

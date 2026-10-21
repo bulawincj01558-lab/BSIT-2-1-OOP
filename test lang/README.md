@@ -84,10 +84,13 @@ on the **Locations** page.
    Select it → **Show QR code** (you can **Save as PNG** or **Copy code**).
 2. Log out, log in as a student → **Scan Attendance**. Use the webcam, **Upload QR image…** with the saved
    PNG, or paste the code. A green banner confirms; scanning again shows a red "Already recorded".
-3. Back as admin → **Attendance Records** shows the student, session, and date/time.
+3. The student sees it under **My Attendance**; the admin sees the count in **Attendance Sessions** (Attendees).
+4. Or use the student's own QR: in **Scan Attendance** the student sees **My attendance QR** (renews every
+   5 minutes). They pick any **Subject** from their class program, then **Save as PNG** / **Copy code** and upload
+   or paste it on the same page (recorded in today's class of that subject, created if needed).
 
 **Student entry (F-4.1, F-4.3, F-4.4)**
-1. As a student → **My Entry QR** → **Generate entry QR** (valid 5 minutes).
+1. As a student → **My Entry QR**. The code appears right away and renews itself every 5 minutes; **Edit profile** fixes wrong details first.
 2. As admin → **Entry Gate** → scan/upload/paste it → "Entry granted". See **Entry & Visit Logs**.
 
 **Guest visit (F-4.2)**

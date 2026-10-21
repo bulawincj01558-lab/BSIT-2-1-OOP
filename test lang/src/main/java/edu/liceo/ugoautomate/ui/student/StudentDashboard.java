@@ -1,6 +1,7 @@
 package edu.liceo.ugoautomate.ui.student;
 
 import edu.liceo.ugoautomate.AppContext;
+import edu.liceo.ugoautomate.model.ClassOffering;
 import edu.liceo.ugoautomate.model.User;
 import edu.liceo.ugoautomate.ui.common.DashboardController;
 import edu.liceo.ugoautomate.ui.common.DataStructuresController;
@@ -32,7 +33,7 @@ public final class StudentDashboard {
         d.setRole("Student");
 
         d.addPage(HOME, HomeController.create(ctx, "Welcome, " + student.getFirstName() + "!", student.getSummary(), d::showPage,
-                new Shortcut(SCAN, "Scan your class or event QR code to record attendance."),
+                new Shortcut(SCAN, "Show your attendance QR to staff, or scan your class or event QR code."),
                 new Shortcut(ENTRY, "Show your entry QR code at the campus gate."),
                 new Shortcut(PROGRAM, "See your classes this term: schedule, room, and instructor."),
                 new Shortcut(HISTORY, "See the classes and events you have attended."),
@@ -41,12 +42,23 @@ public final class StudentDashboard {
                 new Shortcut(TUITION, "See your tuition balance, payments, and discounts this term."),
                 new Shortcut(DATA_STRUCTURES, "See the data structures behind the app, with memory allocation and time complexity."),
                 new Shortcut(PROFILE, "View and update your profile or change your password.")));
-        d.addPage(SCAN, QrScanController.create(ctx, "Scan Attendance",
-                "Scan the attendance QR code shown by your instructor or event organizer.", d.scanHistory(),
-                (code, method) -> ctx.attendance().recordAttendance(code, method)));
+        View<SubjectPickerController> picker = Views.load(ctx, "student/SubjectPicker.fxml");
+        View<QrScanController> scan = QrScanController.create(ctx, "Scan Attendance",
+                "Upload or paste your attendance QR below, show it to your instructor, or scan the session QR code they show you.",
+                d.scanHistory(), (code, method) -> {
+                    ClassOffering subject = picker.controller().selected();
+                    return subject == null
+                            ? ctx.attendance().recordAttendance(code, method)
+                            : ctx.attendance().recordOwnQrForClass(code, method, subject.getId());
+                });
+        scan.controller().addCompanion(Views.load(ctx, "student/AttendanceQr.fxml"));
+        scan.controller().addCompanion(picker);
+        d.addPage(SCAN, scan);
         d.addPage(PROGRAM, Views.load(ctx, "student/ClassProgram.fxml"));
         d.addPage(HISTORY, Views.load(ctx, "student/MyAttendance.fxml"));
-        d.addPage(ENTRY, Views.load(ctx, "student/EntryQr.fxml"));
+        View<EntryQrController> entry = Views.load(ctx, "student/EntryQr.fxml");
+        entry.controller().setOnEditProfile(() -> d.showPage(PROFILE));
+        d.addPage(ENTRY, entry);
         d.addPage(EVALUATION, Views.load(ctx, "student/FacultyEvaluation.fxml"));
         d.addPage(DISCIPLINE, Views.load(ctx, "student/MyDiscipline.fxml"));
         d.addPage(TUITION, Views.load(ctx, "student/MyTuition.fxml"));

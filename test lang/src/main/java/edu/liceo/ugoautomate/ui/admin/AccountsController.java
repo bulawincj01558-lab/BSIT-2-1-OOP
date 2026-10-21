@@ -2,6 +2,7 @@ package edu.liceo.ugoautomate.ui.admin;
 
 import edu.liceo.ugoautomate.AppContext;
 import edu.liceo.ugoautomate.model.Role;
+import edu.liceo.ugoautomate.model.Student;
 import edu.liceo.ugoautomate.model.User;
 import edu.liceo.ugoautomate.ui.common.Async;
 import edu.liceo.ugoautomate.ui.common.Choice;
@@ -43,6 +44,7 @@ public class AccountsController implements Page {
         Choice.fill(roleFilter, "All account types", List.of(Role.STUDENT, Role.GUEST, Role.ADMIN));
 
         Tables.setup(table, "No accounts match the filter.");
+        Tables.column(table, "Student ID", u -> u instanceof Student s ? s.getStudentNumber() : "");
         Tables.column(table, "Name", u -> u.getLastName() + ", " + u.getFirstName());
         Tables.column(table, "Email", User::getEmail);
         Tables.column(table, "Type", User::getRole);
@@ -65,6 +67,17 @@ public class AccountsController implements Page {
         Async.run(table, () -> ctx.accounts().listAccounts(role, text), users -> {
             Tables.setRows(table, users);
             count.setText(users.size() + " account(s)");
+        });
+    }
+
+    @FXML
+    private void addStudent() {
+        View<StudentAddController> view = Views.load(ctx, "admin/StudentAdd.fxml");
+        Views.showDialog(table, "Add Student", view.root());
+        view.controller().added().ifPresent(student -> {
+            reload();
+            Dialogs.info(table, student.getFullName() + " (" + student.getStudentNumber() + ") was added. "
+                    + "Give them their email and password so they can log in.");
         });
     }
 

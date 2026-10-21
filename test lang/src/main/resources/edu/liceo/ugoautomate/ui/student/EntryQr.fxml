@@ -3,14 +3,27 @@
 <?import edu.liceo.ugoautomate.ui.common.QrView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
       fx:controller="edu.liceo.ugoautomate.ui.student.EntryQrController" styleClass="page">
     <Label text="My Entry QR" styleClass="page-title"/>
     <Label fx:id="help" styleClass="page-subtitle" wrapText="true"/>
-    <Button text="Generate entry QR" styleClass="primary" onAction="#generate"/>
+    <VBox fx:id="profileCard" styleClass="card" maxWidth="560">
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Your details" styleClass="section-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Edit profile" onAction="#editProfile"/>
+        </HBox>
+        <Label fx:id="profileName" wrapText="true"/>
+        <Label fx:id="profileSummary" styleClass="muted" wrapText="true"/>
+        <Label text="Wrong details? Edit your profile and a fresh QR code is made when you come back."
+               styleClass="muted" wrapText="true"/>
+    </VBox>
     <VBox styleClass="card" maxWidth="560">
         <QrView fx:id="qrView"/>
+        <Button text="Get a new code" onAction="#generate"/>
     </VBox>
 </VBox>

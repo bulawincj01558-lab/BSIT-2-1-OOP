@@ -6,8 +6,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -49,12 +47,7 @@ public final class Views {
     }
 
     public static Scene scene(Parent root, double width, double height) {
-        Pane sky = new Pane();
-        sky.setMouseTransparent(true);
-        TRexFriend.addTo(sky);
-        TankFriend.addTo(sky);
-        ButterflyFriend.addTo(sky);
-        Scene scene = new Scene(new StackPane(root, sky), width, height);
+        Scene scene = new Scene(root, width, height);
         scene.getStylesheets().add(stylesheet());
         return scene;
     }

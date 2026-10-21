@@ -2,6 +2,7 @@ package edu.liceo.ugoautomate.service;
 
 import edu.liceo.ugoautomate.dao.UserDao;
 import edu.liceo.ugoautomate.model.Role;
+import edu.liceo.ugoautomate.model.Student;
 import edu.liceo.ugoautomate.model.User;
 import edu.liceo.ugoautomate.security.AccessControl;
 import edu.liceo.ugoautomate.security.PasswordHasher;
@@ -13,11 +14,18 @@ public class AccountService {
     private final UserDao userDao;
     private final PasswordHasher hasher;
     private final AccessControl access;
+    private final AuthService auth;
 
-    public AccountService(UserDao userDao, PasswordHasher hasher, AccessControl access) {
+    public AccountService(UserDao userDao, PasswordHasher hasher, AccessControl access, AuthService auth) {
         this.userDao = userDao;
         this.hasher = hasher;
         this.access = access;
+        this.auth = auth;
+    }
+
+    public Student addStudent(StudentRegistration form) {
+        access.requireRole(Role.ADMIN);
+        return auth.registerStudent(form);
     }
 
     public List<User> listAccounts(Role role, String search) {

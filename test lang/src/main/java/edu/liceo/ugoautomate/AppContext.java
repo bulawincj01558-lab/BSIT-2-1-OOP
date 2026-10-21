@@ -81,13 +81,14 @@ public final class AppContext implements AutoCloseable {
 
         this.authService = new AuthService(userDao, hasher, session, clock);
         this.profileService = new ProfileService(userDao, hasher, session, access);
-        this.accountService = new AccountService(userDao, hasher, access);
+        this.accountService = new AccountService(userDao, hasher, access, authService);
         this.locationService = new LocationService(locationDao, access);
-        this.attendanceService = new AttendanceService(sessionDao, recordDao, qrTokens, access, clock);
         this.guestVisitService = new GuestVisitService(visitDao, qrTokens, access, clock);
         this.entryService = new EntryService(userDao, visitDao, entryLogDao, qrTokens, access, clock);
         this.facultyService = new FacultyService(facultyDao, access);
         AcademicTerm term = new AcademicTerm(settingsDao, clock);
+        this.attendanceService = new AttendanceService(sessionDao, recordDao, userDao, classDao, term,
+                qrTokens, access, clock);
         this.evaluationService = new EvaluationService(facultyDao, new JdbcFacultyEvaluationDao(ds), classDao,
                 settingsDao, term, access, clock);
         this.classProgramService = new ClassProgramService(classDao, term, access);

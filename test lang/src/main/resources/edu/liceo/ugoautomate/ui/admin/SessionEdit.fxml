@@ -23,14 +23,12 @@
         <TextField fx:id="title" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
         <Label text="Type" GridPane.rowIndex="1"/>
         <ComboBox fx:id="type" maxWidth="Infinity" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-        <Label text="Location" GridPane.rowIndex="2"/>
-        <ComboBox fx:id="locationBox" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-        <Label text="Date" GridPane.rowIndex="3"/>
-        <DatePicker fx:id="date" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-        <Label text="Start time" GridPane.rowIndex="4"/>
-        <TimeSpinner fx:id="startTime" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-        <Label text="End time" GridPane.rowIndex="5"/>
-        <TimeSpinner fx:id="endTime" maxWidth="Infinity" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+        <Label text="Date" GridPane.rowIndex="2"/>
+        <DatePicker fx:id="date" maxWidth="Infinity" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Start time" GridPane.rowIndex="3"/>
+        <TimeSpinner fx:id="startTime" maxWidth="Infinity" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="End time" GridPane.rowIndex="4"/>
+        <TimeSpinner fx:id="endTime" maxWidth="Infinity" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
     </GridPane>
     <Label text="Students can record attendance only between the start and end time." styleClass="muted" wrapText="true"/>
     <HBox spacing="8" alignment="CENTER_RIGHT">

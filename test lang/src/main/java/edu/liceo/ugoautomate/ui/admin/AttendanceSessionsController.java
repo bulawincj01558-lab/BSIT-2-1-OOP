@@ -14,13 +14,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
 
 import java.time.LocalDateTime;
-import java.util.function.Consumer;
 
 public class AttendanceSessionsController implements Page {
     private static final String SELECT_HINT = "Select a session in the list first.";
 
     private final AppContext ctx;
-    private Consumer<AttendanceSession> onViewRecords = session -> { };
 
     @FXML private TableView<AttendanceSession> table;
 
@@ -33,16 +31,11 @@ public class AttendanceSessionsController implements Page {
         Tables.setup(table, "No sessions yet. Press \"New session\" to create one.");
         Tables.column(table, "Title", AttendanceSession::getTitle);
         Tables.column(table, "Type", AttendanceSession::getType);
-        Tables.column(table, "Location", AttendanceSession::getLocationName);
         Tables.column(table, "Starts", AttendanceSession::getStartsAt, DisplayTime::format);
         Tables.column(table, "Ends", AttendanceSession::getEndsAt, DisplayTime::format);
         Tables.column(table, "Status", AttendanceSessionsController::status);
         Tables.column(table, "Attendees", AttendanceSession::getAttendeeCount);
         Tables.onDoubleClick(table, this::showQr);
-    }
-
-    public void setOnViewRecords(Consumer<AttendanceSession> onViewRecords) {
-        this.onViewRecords = onViewRecords;
     }
 
     private static String status(AttendanceSession s) {
@@ -91,11 +84,6 @@ public class AttendanceSessionsController implements Page {
         Async.run(table, () -> ctx.attendance().issueSessionQr(session.getId()), token ->
                 QrDialogController.show(ctx, table, "Attendance QR Code", token,
                         session.getTitle(), "attendance-session-" + session.getId() + ".png"));
-    }
-
-    @FXML
-    private void viewRecords() {
-        Tables.selected(table, SELECT_HINT).ifPresent(onViewRecords);
     }
 
     @FXML

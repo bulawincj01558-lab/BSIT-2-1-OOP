@@ -37,11 +37,16 @@ public class QrView extends VBox {
     private BufferedImage currentImage;
     private Instant expiresAt;
     private String fileName = "qr-code.png";
+    private Runnable onExpired;
 
     public QrView() {
         Views.loadInto(this, "common/QrView.fxml");
         countdown.setCycleCount(Animation.INDEFINITE);
         clear("No QR code generated yet.");
+    }
+
+    public void setOnExpired(Runnable onExpired) {
+        this.onExpired = onExpired;
     }
 
     public void show(QrToken token, String captionText, String suggestedFileName) {
@@ -82,9 +87,14 @@ public class QrView extends VBox {
         java.time.Duration left = java.time.Duration.between(Instant.now(), expiresAt);
         boolean warn;
         if (left.isNegative() || left.isZero()) {
+            countdown.stop();
+            if (onExpired != null) {
+                expiry.setText("Getting a new code...");
+                onExpired.run();
+                return;
+            }
             expiry.setText("EXPIRED - generate a new code");
             warn = true;
-            countdown.stop();
         } else if (left.toHours() >= 1) {
             expiry.setText("Valid until " + DisplayTime.format(expiresAt));
             warn = false;

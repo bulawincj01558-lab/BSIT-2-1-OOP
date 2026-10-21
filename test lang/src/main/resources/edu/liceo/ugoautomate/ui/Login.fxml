@@ -34,13 +34,13 @@
             <Label text="Log in with your registered email and password." styleClass="page-subtitle" wrapText="true"/>
 
             <Label text="Email"/>
-            <TextField fx:id="email" promptText="you@liceo.edu.ph"/>
+            <TextField fx:id="email" promptText="you@liceo.edu.ph" minWidth="320" prefWidth="320" maxWidth="320"/>
             <Label text="Password"/>
-            <PasswordField fx:id="password"/>
+            <PasswordField fx:id="password" minWidth="320" prefWidth="320" maxWidth="320"/>
             <Label fx:id="message" wrapText="true" styleClass="error-text"/>
 
             <Button fx:id="loginButton" text="Log in" styleClass="primary" defaultButton="true"
-                    maxWidth="Infinity" onAction="#login"/>
+                    minWidth="320" prefWidth="320" maxWidth="320" onAction="#login"/>
 
             <Label text="New here?" styleClass="muted"/>
             <FlowPane styleClass="toolbar">

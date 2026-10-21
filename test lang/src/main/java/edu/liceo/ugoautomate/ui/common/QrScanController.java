@@ -17,11 +17,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -38,7 +40,9 @@ public class QrScanController implements Page {
 
     private BiFunction<String, VerificationMethod, ScanResult> processor;
     private ScanHistory scanHistory;
+    private final List<Page> companions = new ArrayList<>();
 
+    @FXML private VBox page;
     @FXML private Label heading;
     @FXML private Label help;
     @FXML private ResultBanner banner;
@@ -68,6 +72,13 @@ public class QrScanController implements Page {
         scanHistory.addListener(c::refreshHistory);
         c.refreshHistory();
         return view;
+    }
+
+    public void addCompanion(View<?> view) {
+        page.getChildren().add(page.getChildren().indexOf(banner), view.root());
+        if (view.controller() instanceof Page p) {
+            companions.add(p);
+        }
     }
 
     @FXML
@@ -230,11 +241,13 @@ public class QrScanController implements Page {
 
     @Override
     public void onShow() {
+        companions.forEach(Page::onShow);
         Platform.runLater(manualCode::requestFocus);
     }
 
     @Override
     public void onHide() {
         stopCamera();
+        companions.forEach(Page::onHide);
     }
 }

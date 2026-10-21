@@ -2,10 +2,8 @@ package edu.liceo.ugoautomate.ui.admin;
 
 import edu.liceo.ugoautomate.AppContext;
 import edu.liceo.ugoautomate.model.AttendanceSession;
-import edu.liceo.ugoautomate.model.CampusLocation;
 import edu.liceo.ugoautomate.model.SessionType;
 import edu.liceo.ugoautomate.ui.common.Async;
-import edu.liceo.ugoautomate.ui.common.Choice;
 import edu.liceo.ugoautomate.ui.common.TimeSpinner;
 import edu.liceo.ugoautomate.ui.common.Views;
 import javafx.fxml.FXML;
@@ -25,7 +23,6 @@ public class SessionEditController {
     @FXML private Label heading;
     @FXML private TextField title;
     @FXML private ComboBox<SessionType> type;
-    @FXML private ComboBox<Choice<Long>> locationBox;
     @FXML private DatePicker date;
     @FXML private TimeSpinner startTime;
     @FXML private TimeSpinner endTime;
@@ -51,15 +48,6 @@ public class SessionEditController {
             title.setText(session.getTitle());
             type.setValue(session.getType());
         }
-        locationBox.getItems().setAll(new Choice<>("(No location)", null));
-        locationBox.getSelectionModel().selectFirst();
-        Long selectedId = session == null ? null : session.getLocationId();
-        Async.run(title, () -> ctx.locations().listAll(), all -> {
-            for (CampusLocation l : all) {
-                locationBox.getItems().add(new Choice<>(l.toString(), l.getId()));
-            }
-            Choice.select(locationBox, selectedId);
-        });
     }
 
     public boolean isSaved() {
@@ -74,7 +62,7 @@ public class SessionEditController {
         }
         s.setTitle(title.getText());
         s.setType(type.getValue());
-        s.setLocationId(Choice.selectedValue(locationBox));
+        s.setLocationId(original == null ? null : original.getLocationId());
         LocalDate day = date.getValue();
         s.setStartsAt(day == null ? null : day.atTime(startTime.getTime()));
         s.setEndsAt(day == null ? null : day.atTime(endTime.getTime()));

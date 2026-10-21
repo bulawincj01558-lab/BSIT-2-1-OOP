@@ -15,9 +15,7 @@ public final class AdminDashboard {
     private static final String HOME = "Home";
     private static final String GATE = "Entry Gate";
     private static final String ACCOUNTS = "Accounts";
-    private static final String LOCATIONS = "Locations";
     private static final String SESSIONS = "Attendance Sessions";
-    private static final String RECORDS = "Attendance Records";
     private static final String LOGS = "Entry & Visit Logs";
     private static final String CLASSES = "Class Programs";
     private static final String DISCIPLINE = "Discipline";
@@ -38,9 +36,7 @@ public final class AdminDashboard {
         d.addPage(HOME, HomeController.create(ctx, "Welcome, " + admin.getFirstName() + "!", admin.getSummary(), d::showPage,
                 new Shortcut(GATE, "Verify student entry QR codes and guest passes, and log campus entries."),
                 new Shortcut(ACCOUNTS, "View, edit, deactivate, or remove student and guest accounts."),
-                new Shortcut(LOCATIONS, "Add, update, or remove campus buildings, offices, and facilities."),
                 new Shortcut(SESSIONS, "Create class/event sessions and display their attendance QR codes."),
-                new Shortcut(RECORDS, "View and manage recorded attendance."),
                 new Shortcut(LOGS, "Review campus entry logs and guest visits."),
                 new Shortcut(CLASSES, "Create each term's classes and enroll students without schedule conflicts."),
                 new Shortcut(FACULTY, "Add and update the teachers that students evaluate."),
@@ -52,16 +48,7 @@ public final class AdminDashboard {
                 "Scan a student's entry QR or a guest pass. Entries are logged only when verification succeeds.",
                 d.scanHistory(), (code, method) -> ctx.entries().verifyEntry(code, method)));
         d.addPage(ACCOUNTS, Views.load(ctx, "admin/Accounts.fxml"));
-        d.addPage(LOCATIONS, Views.load(ctx, "admin/Locations.fxml"));
-
-        View<AttendanceRecordsController> records = Views.load(ctx, "admin/AttendanceRecords.fxml");
-        View<AttendanceSessionsController> sessions = Views.load(ctx, "admin/AttendanceSessions.fxml");
-        sessions.controller().setOnViewRecords(session -> {
-            records.controller().filterBySession(session.getId());
-            d.showPage(RECORDS);
-        });
-        d.addPage(SESSIONS, sessions);
-        d.addPage(RECORDS, records);
+        d.addPage(SESSIONS, Views.load(ctx, "admin/AttendanceSessions.fxml"));
         d.addPage(LOGS, Views.load(ctx, "admin/EntryLogs.fxml"));
         d.addPage(CLASSES, Views.load(ctx, "admin/ClassPrograms.fxml"));
         d.addPage(FACULTY, Views.load(ctx, "admin/Faculty.fxml"));

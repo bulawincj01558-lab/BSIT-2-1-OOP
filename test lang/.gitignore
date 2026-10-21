@@ -27,7 +27,7 @@ Thumbs.db
 ### Supabase credentials (holds the database password) ###
 supabase.properties
 
-### Personal photos for the butterfly, T-rex, and tank easter eggs (kept out of git; the app skips them when missing) ###
+### Personal photos (kept out of git) ###
 src/main/resources/edu/liceo/ugoautomate/ui/images/butterfly-face.png
 src/main/resources/edu/liceo/ugoautomate/ui/images/trex-face.png
 src/main/resources/edu/liceo/ugoautomate/ui/images/tank-face.png

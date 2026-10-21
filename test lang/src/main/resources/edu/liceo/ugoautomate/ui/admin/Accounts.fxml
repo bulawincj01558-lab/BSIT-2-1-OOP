@@ -20,7 +20,8 @@
         <Label fx:id="count" styleClass="muted"/>
     </FlowPane>
     <FlowPane styleClass="toolbar">
-        <Button text="Edit..." styleClass="primary" onAction="#edit"/>
+        <Button text="Add student..." styleClass="primary" onAction="#addStudent"/>
+        <Button text="Edit..." onAction="#edit"/>
         <Button text="Activate / Deactivate" onAction="#toggleActive"/>
         <Button text="Reset password..." onAction="#resetPassword"/>
         <Button text="Delete" styleClass="danger" onAction="#delete"/>

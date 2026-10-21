@@ -1,6 +1,8 @@
 package edu.liceo.ugoautomate;
 
+import edu.liceo.ugoautomate.model.AttendanceRecord;
 import edu.liceo.ugoautomate.model.AttendanceSession;
+import edu.liceo.ugoautomate.model.AttendanceSlot;
 import edu.liceo.ugoautomate.model.CampusLocation;
 import edu.liceo.ugoautomate.model.CaseStatus;
 import edu.liceo.ugoautomate.model.DisciplineRecord;
@@ -118,6 +120,148 @@ class CampusFlowTest {
 
         ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
         assertEquals(1, ctx.attendance().listRecords(session.getId()).size());
+    }
+
+    @Test
+    void adminScansStudentAttendanceQrIntoOpenSession() {
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        AttendanceSession session = new AttendanceSession();
+        session.setTitle("IT 213 Networking");
+        session.setType(SessionType.CLASS);
+        session.setStartsAt(LocalDateTime.now().minusMinutes(10));
+        session.setEndsAt(LocalDateTime.now().plusHours(1));
+        ctx.attendance().createSession(session);
+        assertTrue(ctx.attendance().listOpenSessions().stream().anyMatch(s -> s.getId() == session.getId()));
+        ctx.auth().logout();
+
+        ctx.auth().login("jose.reyes@liceo.edu.ph", "Student@123");
+        String studentQr = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        String entryQr = ctx.entries().issueStudentEntryQr().getEncoded();
+        ctx.auth().logout();
+
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        ScanResult first = ctx.attendance().recordStudentQr(session.getId(), studentQr, VerificationMethod.IMAGE_FILE);
+        assertTrue(first.isSuccess(), first.toString());
+        ScanResult again = ctx.attendance().recordStudentQr(session.getId(), studentQr, VerificationMethod.IMAGE_FILE);
+        assertEquals("Already recorded", again.getTitle());
+        assertEquals("Wrong QR code",
+                ctx.attendance().recordStudentQr(session.getId(), entryQr, VerificationMethod.IMAGE_FILE).getTitle());
+        assertFalse(ctx.entries().verifyEntry(studentQr, VerificationMethod.IMAGE_FILE).isSuccess());
+        assertEquals(1, ctx.attendance().listRecords(session.getId()).size());
+    }
+
+    @Test
+    void studentUploadsOwnAttendanceQrIntoChosenSession() {
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        AttendanceSession session = new AttendanceSession();
+        session.setTitle("IT 214 Web Development");
+        session.setType(SessionType.CLASS);
+        session.setStartsAt(LocalDateTime.now().minusMinutes(10));
+        session.setEndsAt(LocalDateTime.now().plusHours(1));
+        ctx.attendance().createSession(session);
+        ctx.auth().logout();
+
+        ctx.auth().login("maria.santos@liceo.edu.ph", "Student@123");
+        String marias = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        ctx.auth().logout();
+
+        ctx.auth().login("juan.delacruz@liceo.edu.ph", "Student@123");
+        String own = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        assertTrue(ctx.attendance().listOpenSessions().stream().anyMatch(s -> s.getId() == session.getId()));
+        ScanResult first = ctx.attendance().recordAttendance(own, VerificationMethod.IMAGE_FILE, session.getId());
+        assertTrue(first.isSuccess(), first.toString());
+        assertEquals("Already recorded",
+                ctx.attendance().recordAttendance(own, VerificationMethod.MANUAL_ENTRY, session.getId()).getTitle());
+        assertEquals("Not your QR code",
+                ctx.attendance().recordAttendance(marias, VerificationMethod.MANUAL_ENTRY, session.getId()).getTitle());
+    }
+
+    @Test
+    void studentRecordsOwnQrForAnySubjectOutsideClassHours() {
+        String term = "SY 2026-2027 1st Semester";
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        ClassOffering mine = newClass(term, "IT 390", Set.of(DayOfWeek.SUNDAY), LocalTime.of(3, 0), LocalTime.of(4, 0));
+        ctx.classPrograms().create(mine);
+        ctx.classPrograms().enrollByStudentNumber(mine.getId(), "2023-00123");
+        ClassOffering notMine = newClass(term, "IT 391", Set.of(DayOfWeek.SUNDAY), LocalTime.of(5, 0), LocalTime.of(6, 0));
+        ctx.classPrograms().create(notMine);
+        int sessionsBefore = ctx.attendance().listSessions().size();
+        ctx.auth().logout();
+
+        ctx.auth().login("maria.santos@liceo.edu.ph", "Student@123");
+        String marias = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        ctx.auth().logout();
+
+        ctx.auth().login("juan.delacruz@liceo.edu.ph", "Student@123");
+        String own = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        ScanResult first = ctx.attendance().recordOwnQrForClass(own, VerificationMethod.IMAGE_FILE, mine.getId());
+        assertTrue(first.isSuccess(), first.toString());
+        assertEquals("Already recorded",
+                ctx.attendance().recordOwnQrForClass(own, VerificationMethod.MANUAL_ENTRY, mine.getId()).getTitle());
+        assertEquals("Not your QR code",
+                ctx.attendance().recordOwnQrForClass(marias, VerificationMethod.MANUAL_ENTRY, mine.getId()).getTitle());
+        assertEquals("Not enrolled",
+                ctx.attendance().recordOwnQrForClass(own, VerificationMethod.MANUAL_ENTRY, notMine.getId()).getTitle());
+        ctx.auth().logout();
+
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        List<AttendanceSession> sessions = ctx.attendance().listSessions();
+        assertEquals(sessionsBefore + 1, sessions.size());
+        AttendanceSession today = sessions.stream().filter(s -> s.getTitle().equals("IT 390 - Test subject")).findFirst().orElseThrow();
+        assertEquals(LocalDate.now(), today.getStartsAt().toLocalDate());
+        assertEquals(1, ctx.attendance().listRecords(today.getId()).size());
+    }
+
+    @Test
+    void onlyAdminCanAddStudentsWhoCanThenLogIn() {
+        StudentRegistration form = new StudentRegistration("2026-00042", "Liza", "Ramos", "BS Information Technology", 2,
+                "liza.ramos@liceo.edu.ph", "", "Welcome123", "Welcome123");
+
+        ctx.auth().login("juan.delacruz@liceo.edu.ph", "Student@123");
+        assertThrows(AccessDeniedException.class, () -> ctx.accounts().addStudent(form));
+        ctx.auth().logout();
+
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        assertEquals("2026-00042", ctx.accounts().addStudent(form).getStudentNumber());
+        assertThrows(ServiceException.class, () -> ctx.accounts().addStudent(form));
+        ctx.auth().logout();
+
+        assertEquals(Role.STUDENT, ctx.auth().login("liza.ramos@liceo.edu.ph", "Welcome123").getRole());
+    }
+
+    @Test
+    void adminRecordsMorningAndAfternoonTimeInAndOut() {
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        AttendanceSession day = new AttendanceSession();
+        day.setTitle("Foundation Day");
+        day.setType(SessionType.EVENT);
+        day.setStartsAt(LocalDateTime.now().minusMinutes(10));
+        day.setEndsAt(LocalDateTime.now().plusHours(1));
+        ctx.attendance().createSession(day);
+        ctx.auth().logout();
+
+        ctx.auth().login("juan.delacruz@liceo.edu.ph", "Student@123");
+        String qr = ctx.attendance().issueStudentAttendanceQr().getEncoded();
+        ctx.auth().logout();
+
+        ctx.auth().login("admin@liceo.edu.ph", "Admin@123");
+        long id = day.getId();
+        assertEquals("No morning time in yet",
+                ctx.attendance().recordStudentQr(id, qr, VerificationMethod.IMAGE_FILE, AttendanceSlot.MORNING_OUT).getTitle());
+        assertTrue(ctx.attendance().recordStudentQr(id, qr, VerificationMethod.IMAGE_FILE, AttendanceSlot.MORNING_IN).isSuccess());
+        assertEquals("Already recorded",
+                ctx.attendance().recordStudentQr(id, qr, VerificationMethod.IMAGE_FILE, AttendanceSlot.MORNING_IN).getTitle());
+        assertTrue(ctx.attendance().recordStudentQr(id, qr, VerificationMethod.WEBCAM, AttendanceSlot.MORNING_OUT).isSuccess());
+        assertTrue(ctx.attendance().recordStudentQr(id, qr, VerificationMethod.WEBCAM, AttendanceSlot.AFTERNOON_IN).isSuccess());
+
+        List<AttendanceRecord> records = ctx.attendance().listRecords(id);
+        assertEquals(1, records.size());
+        AttendanceRecord r = records.get(0);
+        assertTrue(r.getTime(AttendanceSlot.MORNING_IN) != null && r.getTime(AttendanceSlot.MORNING_OUT) != null);
+        assertTrue(r.getTime(AttendanceSlot.AFTERNOON_IN) != null && r.getTime(AttendanceSlot.AFTERNOON_OUT) == null);
+
+        ctx.attendance().deleteRecord(r.getId());
+        assertTrue(ctx.attendance().recordStudentQr(id, qr, VerificationMethod.IMAGE_FILE, AttendanceSlot.MORNING_IN).isSuccess());
     }
 
     @Test

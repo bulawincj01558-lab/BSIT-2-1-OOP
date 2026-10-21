@@ -61,7 +61,7 @@ public class EntryService {
         return switch (token.getType()) {
             case STUDENT_ENTRY -> verifyStudent(token, method, gateAdmin);
             case GUEST_PASS -> verifyGuest(token, method, gateAdmin);
-            case ATTENDANCE -> ScanResult.failure("Entry denied",
+            case ATTENDANCE, STUDENT_ATTENDANCE -> ScanResult.failure("Entry denied",
                     "This is an attendance QR code. Ask the person for their entry QR or guest pass.");
         };
     }

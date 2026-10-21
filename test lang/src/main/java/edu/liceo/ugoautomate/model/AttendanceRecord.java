@@ -1,6 +1,8 @@
 package edu.liceo.ugoautomate.model;
 
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.Map;
 
 public class AttendanceRecord {
     private long id;
@@ -12,6 +14,15 @@ public class AttendanceRecord {
     private String sessionTitle;
     private String studentName;
     private String studentNumber;
+    private final Map<AttendanceSlot, LocalDateTime> times = new EnumMap<>(AttendanceSlot.class);
+
+    public LocalDateTime getTime(AttendanceSlot slot) {
+        return times.get(slot);
+    }
+
+    public void setTime(AttendanceSlot slot, LocalDateTime time) {
+        times.put(slot, time);
+    }
 
     public long getId() {
         return id;

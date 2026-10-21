@@ -17,6 +17,8 @@ public final class AppConfig {
 
     public static final Duration STUDENT_ENTRY_QR_VALIDITY = Duration.ofMinutes(5);
 
+    public static final Duration STUDENT_ATTENDANCE_QR_VALIDITY = Duration.ofMinutes(5);
+
     public static final int MAX_VISIT_DAYS_AHEAD = 30;
 
     public static final String DB_PATH_PROPERTY = "ugo.db";
